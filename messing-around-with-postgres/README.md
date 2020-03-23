@@ -6,7 +6,7 @@
 
 postgres:
 
-> docker run --name pg -p 5432:5432 -e POSTGRES_PASSOWRD=postgres -v $(pwd)/messsing-around-with-postgres/data:/var/lib/postgresql/data -d postgres
+> docker run --name pg -p 5432:5432 -e POSTGRES_PASSOWRD=postgres -v \$(pwd)/messsing-around-with-postgres/data:/var/lib/postgresql/data -d postgres
 
 _additional flags: POSTGRES_USER and POSOSTGRES_DB_
 
@@ -14,7 +14,7 @@ pgadmin4:
 
 > docker run --name pgadmin -p 80:80 -e PGADMIN_DEFAULT_EMAIL=email PGADMIN_DEFAULT_PASSWORD=password -d dpage/pgadmin4
 
-- docker compose:
+- docker compose: [docker-compose.yml](./docker-compose.yml)
 
 _caveats:_
 
