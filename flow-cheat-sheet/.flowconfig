@@ -1,0 +1,29 @@
+[include] 
+src/ # Including a directory recursively includes all the files under that directory
+
+[ignore]
+<PROJECT_ROOT>/__test__/ # Example ot not read and watch for changes
+
+[untyped]
+<PROJECT_ROOT>/third_party/**/*.* # Not check types following this regExpresion Run on declaration mode
+
+[libs] 
+# Tells flow to include lib defs when type checking codes by default flow-typed on root
+# Also allow using using flow-typed pacakge to install third-party libs without config
+# e.g flow-typed install rxjs@5.0.x
+
+[lints] # ruleA=severityA
+
+  
+[options]# Add emoji to status message!
+emoji=true 
+
+[version]
+# Which version of flow I'm gonna use
+
+[declarations]
+# Acting almost like [untyped]
+<PROJECT_ROOT>/third_party/.*
+
+[strict]
+
