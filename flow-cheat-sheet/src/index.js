@@ -332,3 +332,17 @@ type tmp$Values = $Values<typeof tmpUtil> // FOO | BAR
 // $Exact<T> // {| foo: 'FOO', bar: 'BAR' |}
 
 // $Diff<T, K> 
+
+// and so on ... ! https://flow.org/en/docs/types/utilities/
+
+
+/* module types */
+
+export default class Foo{}
+export type myObj = {foo: string}
+export myNum = 42;
+
+// import type Foo, {myObj} from './exports' 
+// import typeof {myNum} from './exports'
+
+ 
