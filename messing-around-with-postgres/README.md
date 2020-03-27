@@ -21,3 +21,5 @@ _caveats:_
 - Use machine address in order to connect pgAdmin to postgres container
   > ip addr show
   > 192.168. . . _global tune0_
+  or
+  > ifconfig
