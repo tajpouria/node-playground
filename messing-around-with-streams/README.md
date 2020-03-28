@@ -14,7 +14,7 @@ Streams provides two major advantages compared to other data handling methods:
 
 ## Using Streams with asynchronous iterators
 
-[`streamsWithAsyncIterators`](./streamsWithAsyncIterators)
+[`streamsWithAsyncIterators`](./streamsWithAsyncIterators.js)
 
 ## Stream two reading modes
 
@@ -38,11 +38,52 @@ It's also possible to back in `pause` mode using:
 - If there was pipe destinations by removing all pipe destinations, multiple pipe destinations can removed by calling `stream.unpipe()`
 
 ## Writeable Stream
-  
 
-`fs.createWriteStram()` provides `write()` can be used to write data to the stream 
-The `write()` will return either true or false indicate that writing data was successful or we can not write data  at the moment, Use `writeable.end()` as a signal to that no more data should be written in the writeable
+`fs.createWriteStram()` provides `write()` can be used to write data to the stream
+The `write()` will return either true or false indicate that writing data was successful or we can not write data at the moment, Use `writeable.end()` as a signal to that no more data should be written in the writeable
 
 [writStream](./writStream)
 
+## stream.pipeLine
 
+Easily pipe a series of streams 
+[pipeline.mjs](pipeline.mjs)
+
+## Sundry
+
+### util.promisify
+
+Introduced in node 8 used to converting callback based function to Promise-base one in [./promisify.mjs](./promisify.mjs) you can find:
+
+- how to promisify an callback-based function that it's call back just receive one argument e.g. `fs.readFile()`
+- how to promisify an callback-based function that it's call back just receive more **than one argument** e.g. `fs.dns.lookup()`
+
+### events.once
+
+[once.mjs](./once.mjs)
+
+`events(EventEmittter, eventName)` returns a promise that full filed once given `eventName` emitted or rejected whenever given `EventEmitter` emit `error` event, Note that the promise will resolve with an array of all arguments that emitted
+
+### stream.finished
+
+`finished(readable/writeable, callback)` A function to got fired whenever a stream is no longer readable/writeable/experienced and error or premature close event
+
+```js
+import * as stream from "stream";
+import * as util from "util";
+import * as fs from "fs";
+
+const finished = util.promisify(stream.finished);
+
+const readable = fs.createReadStream();
+
+async function run() {
+  await finished(readable);
+
+  console.info("Stream finished");
+}
+
+run().catch(console.error);
+
+readable.resume(); // drain the stream
+```

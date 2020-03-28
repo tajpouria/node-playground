@@ -15,5 +15,14 @@ async function copy(readable, writeable) {
 
   await copy(readStream, writeStream);
 
-  console.log('Copied!')
+  console.log("Copied!");
 })();
+
+// e.g.2
+
+const exampleWriteable = fs.createWriteStream("writeExample.txt", {
+  encoding: "utf-8"
+});
+
+exampleWriteable.write("Hello");
+exampleWriteable.end("World");
