@@ -65,6 +65,44 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
   > db.collection.find({"score": {$elemMatch: {$gte: 80, \$lte: 85}}})
 
+- dropDatabase
+
+  > db.dropDatebase()
+
+- \$exists: Identify whether a field exists or not
+
+  > db.collection.find({ foo : {\$exists: true} })
+
+- new Timestamp(): the result will be current time `Timestamp(1213123, 1)` the second argument of result _1 in this case_ is ordinal component which represents where to insert queue element
+
+- db.stats()
+
+- NumberInt(): Construct 32-bit number _Shell/javascript default Number type is 64-bit in_
+
+> db.collection.insertOne({number: 1}) # 64-bit number
+> db.collection.insertOne({number: NumberInt(1)}) # 32-bit number
+
+- typeof
+
+> typeof db.collection.findOne({\_id:1 }).number # Number
+
+- \$lookup: Merging references https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/#examples
+
+  > db.books.aggregate([{$lookup: { from: 'authors', localField: 'authors', foreignField: '\_id', as: 'creators' }}])
+
+- cursor.sort(): https://docs.mongodb.com/manual/reference/method/cursor.sort/
+
+  > db.find().sort({name: -1}) # descending name order
+
+- \$regex and \$not: https://docs.mongodb.com/manual/reference/operator/query/regex/#regex-and-not
+
+  > db.collection.find({name: {$not: /^go/}})
+  > db.collection.find({name: {$regex: /go\$/}})
+
+- \$or https://docs.mongodb.com/manual/reference/operator/query/or/#or-clauses-and-indexes
+  
+  > db.collection.find({\$or: [{name: 'foo'}, {name: 'bar'}])
+
 ## Operators
 
 - Comparison Query Operators https://docs.mongodb.com/manual/reference/operator/query-comparison/
@@ -83,15 +121,21 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 - shut down mongod (There is couple of other ways e.g. shutdown from shell in provided link)
   > mongod --shutdown
 
+# Data types https://data-flair.training/blogs/mongodb-data-types/
+
 ## To Read
 
 - [] How mongo actually works behind the scene
-- [] **How to design a efficient Collection schema**
+- [] **How to design a efficient Collection schema** (Database architecture in general)
 - [] MongoDB nesting limitation sees like 100 level of embedded and overall document size should be under 16mb
 - [] https://www.w3resource.com/mongodb-exercises/#PracticeOnline
+- [] Validation actions in details
+- [] db.command()
 
 ## Sundry
 
 - copy files/folders between a container and the local filesystem
 
   > docker cp ./mock.json mongodb:/user/mock # copy mock.json from local to mongodb container under /user/mock directory it is possible to copy from container to local
+
+- [ERD](https://www.lucidchart.com/pages/ER-diagram-symbols-and-meaning)
