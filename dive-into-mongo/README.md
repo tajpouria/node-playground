@@ -55,29 +55,31 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
   > mongoimport --db test --collection restaurants --drop --file ./usr/mock/mock.json
 
-- limit() # Limit the number of retrieved data
+  - `--jsonArray` If JSON document wrapped into array
+
+* limit() # Limit the number of retrieved data
 
   > db.collection.find().limit(5)
 
-- skip() # Skips the first n specified number
+* skip() # Skips the first n specified number
 
-- \$elemMatch: Matches the documents that contain an array field that at least one element matches specified query all criteria
+* \$elemMatch: Matches the documents that contain an array field that at least one element matches specified query all criteria
 
   > db.collection.find({"score": {$elemMatch: {$gte: 80, \$lte: 85}}})
 
-- dropDatabase
+* dropDatabase
 
   > db.dropDatebase()
 
-- \$exists: Identify whether a field exists or not
+* \$exists: Identify whether a field exists or not
 
   > db.collection.find({ foo : {\$exists: true} })
 
-- new Timestamp(): the result will be current time `Timestamp(1213123, 1)` the second argument of result _1 in this case_ is ordinal component which represents where to insert queue element
+* new Timestamp(): the result will be current time `Timestamp(1213123, 1)` the second argument of result _1 in this case_ is ordinal component which represents where to insert queue element
 
-- db.stats()
+* db.stats()
 
-- NumberInt(): Construct 32-bit number _Shell/javascript default Number type is 64-bit in_
+* NumberInt(): Construct 32-bit number _Shell/javascript default Number type is 64-bit in_
 
 > db.collection.insertOne({number: 1}) # 64-bit number
 > db.collection.insertOne({number: NumberInt(1)}) # 32-bit number
@@ -100,8 +102,28 @@ This conversion happened by each languages MongoDB drivers. As an example of add
   > db.collection.find({name: {$regex: /go\$/}})
 
 - \$or https://docs.mongodb.com/manual/reference/operator/query/or/#or-clauses-and-indexes
-  
+
   > db.collection.find({\$or: [{name: 'foo'}, {name: 'bar'}])
+
+  btw \$or operator syntax are exactly same
+
+- `db.collection.insert()` Not retrieves objectId() but `insertOne()` and `insertMany()` will
+
+- Access array elements https://www.w3resource.com/mongodb-exercises/mongodb-exercise-23.php
+
+  > db.collection.find({'grades.2.score': 15})
+
+- \$where: https://stackoverflow.com/questions/4442453/mongodb-query-condition-on-comparing-2-fields
+
+  > db.collection.find({\$where: function() { return Math.round(this.id) === 12}})
+
+- \$type: https://docs.mongodb.com/manual/reference/operator/query/type/#querying-by-multiple-data-type
+
+  > db.collection.find({coord" {\$type: 'double'}})
+
+- \$mod: https://docs.mongodb.com/manual/reference/operator/query/mod/#op._S_mod
+
+  > db.collection.find({score: {\$mod: [7,0]}})
 
 ## Operators
 
@@ -111,6 +133,25 @@ This conversion happened by each languages MongoDB drivers. As an example of add
   - \$set
     > db.collection.update({ age: { $lte: 12 } }, {$set:{ mark: 'shouldDeleted' }})
 
+## Insert
+
+- ordered and unordered insert (consider by default {ordered: true}): https://docs.mongodb.com/manual/reference/method/db.collection.insertMany/#unordered-inserts
+
+  > db.collection.insertMany([{ \_id: 12}, { \_id: 12}, {\_id: 13}], {ordered: true}) // Insert first by throw error on index 1 and not inserts rest
+  > db.collection.insertMany([{ \_id: 12}, { \_id: 12}, {\_id: 13}], {ordered: false}) // Throw error on index 0 and 1 and not enter any one
+
+- write Concern and journal
+
+  > db.collection.insertOne({}, {writeConcern: {w: 1, j: undefined, wtimeout: 0 }}) // Default values; w: 1 means sever should acknowledged this - j: undefined means not to add write request to journal - wtimeout limit timeout until request completed consider wtimeout:0 means do not apply wtimeout
+
+  e.g.
+
+  > db.collection.insertOne({}, {writeConcern: {w: 0}}) // Don't wait until server acknowledged this
+
+  > db.collection.insertOne({}, {writeConcern: {wtimeout: true}}) // Add the request to journal and wait until it Added
+
+  > db.collection.insertOne({}, {writeConcern: {wtimeout: 200}}) // Time limit until to acknowledge result
+
 ## Manage mongo processes https://docs.mongodb.com/manual/tutorial/manage-mongodb-processes/
 
 - Running mongod on port
@@ -119,18 +160,41 @@ This conversion happened by each languages MongoDB drivers. As an example of add
   > mongo --port 12345 # Caveats mongo shell connecting to 27017 by default so consider that
 
 - shut down mongod (There is couple of other ways e.g. shutdown from shell in provided link)
+
   > mongod --shutdown
 
-# Data types https://data-flair.training/blogs/mongodb-data-types/
+- Specify data directory
+
+  > mongod --dbpath /srv/mongodb/
+
+- Manage logs
+
+  > mongod --logpath /var/log/mongodb/mongod.log
+
+- Enable deamon mode which running mongos and mongod at the background
+
+  > mongod --fork --logpath /var/mlogs.log
+
+  - In order to shutdown mongod running on the background
+    > mongo
+    > use admin
+    > db.shutdownServer()
+
+- Configuration file https://docs.mongodb.com/manual/reference/configuration-options/index.html
+
+  > mongod -f ./mongod.conf
+
+## Data types https://data-flair.training/blogs/mongodb-data-types/
 
 ## To Read
 
 - [] How mongo actually works behind the scene
 - [] **How to design a efficient Collection schema** (Database architecture in general)
 - [] MongoDB nesting limitation sees like 100 level of embedded and overall document size should be under 16mb
-- [] https://www.w3resource.com/mongodb-exercises/#PracticeOnline
+- [X] https://www.w3resource.com/mongodb-exercises/#PracticeOnline
 - [] Validation actions in details
 - [] db.command()
+- [] write Concern and journal
 
 ## Sundry
 
