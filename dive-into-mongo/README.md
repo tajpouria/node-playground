@@ -24,6 +24,10 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
   > db.collection.find().pretty()
 
+- count()
+
+  > db.collection.find({$nor: [{'score.average': { $gt: 30}}, {'sore.average': { $lte: 12 }}]}) // $nor acts inverse of \$or
+
 - Override `_id` _it is possible as long as it is unique if not it will cause `WriteError`_
 
   > db.collection.addOne({\_id: 'unique-id'})
@@ -45,41 +49,84 @@ This conversion happened by each languages MongoDB drivers. As an example of add
   ```
 
   > db.collection.find({"details.tags": "sport"}) # array contains "sport"!
-  > db.collection.find({}, {"details.tags": 1}) # projection
 
-- Load js script https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/
+- Projection:
 
-- update vs updateMany: `update` find all elements matching filter and _replace_ them with provided data; however `updateMany` and `updateOne` throw error if no atomic operator provided; In general using `db.collection.replaceOne()` is recommended
+  > db.collection.find({}, {"details.tags": 1, age: 1, \_id: 0)}) # Projection
+  > db.collection.find({'scores': {$gt: 20}}, {'tags.\$': 1}) # Array projection in this case only return the first element that is greater than 20 https://docs.mongodb.com/manual/reference/operator/projection/positional/#examples
+  > db.collection.find({'genres': 'Drama'}, {genres: {$elemMach: {\$eq: 'Horror'}}}) # Array projection https://docs.mongodb.com/manual/reference/operator/projection/elemMatch/#zipcode-search
+  > db.collection.find({'genres': 'Drama'}, {genres: {\$slice: [1, 2]}}) # [1, 2] means skip 1 element and return next 2 element
 
-- mongoimport https://docs.mongodb.com/guides/server/import/
+* Load js script https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/
+
+* update vs updateMany: `update` find all elements matching filter and _replace_ them with provided data; however `updateMany` and `updateOne` throw error if no atomic operator provided; In general using `db.collection.replaceOne()` is recommended
+
+* mongoimport https://docs.mongodb.com/guides/server/import/
 
   > mongoimport --db test --collection restaurants --drop --file ./usr/mock/mock.json
 
   - `--jsonArray` If JSON document wrapped into array
 
-* limit() # Limit the number of retrieved data
+- limit() # Limit the number of retrieved data
 
   > db.collection.find().limit(5)
 
-* skip() # Skips the first n specified number
+- skip(): Skips the first n specified number
 
-* \$elemMatch: Matches the documents that contain an array field that at least one element matches specified query all criteria
+* Searching nested arrays: Also consider following for searching array fields:
+
+> db.collection.addMany([{score: {title: 'A'}}, {score: {title: 'B'}}])
+> db.collection.find({'score.title': 'A'})
+
+- \$elemMatch: Matches the documents that contain an array field that at least one element matches specified query all criteria
 
   > db.collection.find({"score": {$elemMatch: {$gte: 80, \$lte: 85}}})
 
-* dropDatabase
+  Let me get **\$elemMatch** actual use case straight; Consider following example:
+
+  > let data = [{hobbies: [{title: 'foo', freq: 2}, {title: 'bar', freq: 4}] }]
+  > db.collection.insertMany(data)
+
+  Consider we're lookup for document contains elements title=2 and freq=4:
+
+  > db.collection.find({'hobbies.title': 'foo', 'hobbies.freq': 4 }})
+
+> here's the result we get:
+
+```js
+{
+  hobbies: [
+    { title: "foo", freq: 2 },
+    { title: "bar", freq: 4 }
+  ];
+}
+```
+
+But there is a problem here; We're actually looking for a document that contains exactly `{ title: 'foo', freq: 4}`; using `\$elemMatch` is the solution:
+
+> db.collection.find({hobbies: {\$elemMatch: {title: 'foo', freq: 4}}})
+
+- \$size: Query array size
+
+  > db.collection.find({hobbies: {\$size: 3}})
+
+- \$all: All elements included in array field but the order doesn't matter
+
+  > db.collection.find({hobbies: {genres: {\$all: ['Drama', 'Horror']}}})
+
+- dropDatabase
 
   > db.dropDatebase()
 
-* \$exists: Identify whether a field exists or not
+- \$exists: Identify whether a field exists or not
 
   > db.collection.find({ foo : {\$exists: true} })
 
-* new Timestamp(): the result will be current time `Timestamp(1213123, 1)` the second argument of result _1 in this case_ is ordinal component which represents where to insert queue element
+- new Timestamp(): the result will be current time `Timestamp(1213123, 1)` the second argument of result _1 in this case_ is ordinal component which represents where to insert queue element
 
-* db.stats()
+- db.stats()
 
-* NumberInt(): Construct 32-bit number _Shell/javascript default Number type is 64-bit in_
+- NumberInt(): Construct 32-bit number _Shell/javascript default Number type is 64-bit in_
 
 > db.collection.insertOne({number: 1}) # 64-bit number
 > db.collection.insertOne({number: NumberInt(1)}) # 32-bit number
@@ -94,7 +141,7 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
 - cursor.sort(): https://docs.mongodb.com/manual/reference/method/cursor.sort/
 
-  > db.find().sort({name: -1}) # descending name order
+  > db.find().sort({'details.name': -1}) # descending name order
 
 - \$regex and \$not: https://docs.mongodb.com/manual/reference/operator/query/regex/#regex-and-not
 
@@ -105,25 +152,44 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
   > db.collection.find({\$or: [{name: 'foo'}, {name: 'bar'}])
 
-  btw \$or operator syntax are exactly same
+  btw \$and operator syntax are exactly same
+
+  **Note**: So why even \$and operator exists since we can use for example `db.collectino.find({foo: 'bar', bar: 'foo'})` ?
+  There is gotcha there consider this example `db.collection.find({genres: 'Horror', genres: 'Drama'})` as you can see we're looking for documents that have either 'Horror' or 'Drama' in their genres:
+  BUT in JSON document there is no duplicate key allowed _duplicate key overrided_:
+
+```js
+JSON.stringify({ foo: "bar", foo: "foo" }) === JSON.stringify({ foo: "foo" });
+```
+
+There the actual place that `$or` operator comes into the play `db.collection.find({$or: [{genres: 'Horror'}, {gneres: 'Drama'}]})`
 
 - `db.collection.insert()` Not retrieves objectId() but `insertOne()` and `insertMany()` will
 
-- Access array elements https://www.w3resource.com/mongodb-exercises/mongodb-exercise-23.php
+* Access array elements https://www.w3resource.com/mongodb-exercises/mongodb-exercise-23.php
 
   > db.collection.find({'grades.2.score': 15})
 
-- \$where: https://stackoverflow.com/questions/4442453/mongodb-query-condition-on-comparing-2-fields
+* \$where: https://stackoverflow.com/questions/4442453/mongodb-query-condition-on-comparing-2-fields
 
   > db.collection.find({\$where: function() { return Math.round(this.id) === 12}})
 
-- \$type: https://docs.mongodb.com/manual/reference/operator/query/type/#querying-by-multiple-data-type
+* \$expr: Compare to filed together: https://docs.mongodb.com/manual/reference/operator/query/expr/#op._S_expr
+
+  > db.collection.find({$expr: {$gt:['$foo', '$bar']}) // Retrieve the documents which field foo is greater than bar
+
+* \$type: https://docs.mongodb.com/manual/reference/operator/query/type/#querying-by-multiple-data-type
 
   > db.collection.find({coord" {\$type: 'double'}})
 
-- \$mod: https://docs.mongodb.com/manual/reference/operator/query/mod/#op._S_mod
+* \$mod: https://docs.mongodb.com/manual/reference/operator/query/mod/#op._S_mod
 
   > db.collection.find({score: {\$mod: [7,0]}})
+
+* Find an array the contains element or is the certain element
+
+  > db.collection.find({genres: "Drama"}) // Retrieve documents that it's genres field contain 'Drama' like ['Dream', 'Horror']
+  > db.collection.find({genres: ["Drama"]}) // Retrieve documents that it's genres is exactly ['Drama']
 
 ## Operators
 
@@ -191,7 +257,7 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 - [] How mongo actually works behind the scene
 - [] **How to design a efficient Collection schema** (Database architecture in general)
 - [] MongoDB nesting limitation sees like 100 level of embedded and overall document size should be under 16mb
-- [X] https://www.w3resource.com/mongodb-exercises/#PracticeOnline
+- [x] https://www.w3resource.com/mongodb-exercises/#PracticeOnline
 - [] Validation actions in details
 - [] db.command()
 - [] write Concern and journal
