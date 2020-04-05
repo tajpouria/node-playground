@@ -191,6 +191,50 @@ There the actual place that `$or` operator comes into the play `db.collection.fi
   > db.collection.find({genres: "Drama"}) // Retrieve documents that it's genres field contain 'Drama' like ['Dream', 'Horror']
   > db.collection.find({genres: ["Drama"]}) // Retrieve documents that it's genres is exactly ['Drama']
 
+* \$inc: Increment with a certain number
+
+  > db.users.updateMany({}, {\$inc: {age: -1}})
+
+* $min, $max: Increment or decrement the value if $min is less than or $max is greater than it:
+
+  > db.users.updateOne({}, {\$min: {age: 32}}) // For example in this case age will be 32 if : 32 is less than current value
+
+* \$unset: Remove a field
+
+  > db.users.updateOne({name: 'foo'}, {\$unset: {age: ''}})
+
+* \$rename:
+
+  > db.users.updateMany({}, {\$rename: {name: 'firstName'}})
+
+* \$upsert: blend of update and insert _Insert if not exists_
+
+  > db.users.updateMany({name: 'yike'}, {\$set:{age: 20}})
+
+* **\$(update) refer to matched document** for instance consider following example we're trying to add a field to first document that matches https://docs.mongodb.com/manual/reference/operator/update/positional/
+
+  > db.users.updateMany({hobbies: {$elemMatch: {title: 'Cocking'}}}, {$set:{'hobbies.\$.thisFieldAddedByQuery': true }})
+
+* \$[] : Update all element of embedded array https://docs.mongodb.com/manual/reference/operator/update/positional-all/#examples
+
+  > db.collection.updateMany({'hobbies.title': 'Hiking'}, {$inc: {"hobbies.$[].freq": 1 }})
+
+* arrayFilters Update documents that matches arrayFilters https://docs.mongodb.com/manual/reference/operator/update/positional-filtered/index.html#update-all-array-elements-that-match-arrayfilters
+
+  > db.collection.updateOne({}, {$set: {'hobbies.$[el].mark': true}}, {arrayFilters: [{'el.shouldMarked' : true}]}) # el is an arbitrary name
+
+* Adding element to an array : $push, $each:
+
+  > db.collection.updateMany({}, {$push: {hobbies: {title: 'foo'}}}) # Push one document
+  > db.collection.updateMany({}, {$push: {hobbies: {$each: [{title: 'foo'}, {title: 'bar}] $sort: {title: -1}}}}) # More than one; \$sort specify how elements should be sorted before pushing into array
+
+* Remove element from array: $pull, $pop:
+
+  > db.collection.updateMany({}, {\$pull: {hobbies: {title: 'foo'}}})
+  > db.collection.updateMany({}, {\$pop: {hobbies: 1}})
+
+- \$addToSet adds unique values only
+
 ## Operators
 
 - Comparison Query Operators https://docs.mongodb.com/manual/reference/operator/query-comparison/
