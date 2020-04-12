@@ -14,29 +14,32 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
 ## Shell https://docs.mongodb.com/manual/reference/mongo-shell/
 
-- `db.collection.find()` returns cursor object, checkout utility function by chaining `help()` method to it _consider `db.collection.findOne()` retrieves the actual docuement_
+- running JS file into shell
+  > \$ mongo file-name.js
+
+* `db.collection.find()` returns cursor object, checkout utility function by chaining `help()` method to it _consider `db.collection.findOne()` retrieves the actual docuement_
 
   > db.collection.find().help()
 
   > db.collection.find().forEach(doc => printjson(doc))
 
-- pretty()
+* pretty()
 
   > db.collection.find().pretty()
 
-- count()
+* count()
 
   > db.collection.find({$nor: [{'score.average': { $gt: 30}}, {'sore.average': { $lte: 12 }}]}) // $nor acts inverse of \$or
 
-- Override `_id` _it is possible as long as it is unique if not it will cause `WriteError`_
+* Override `_id` _it is possible as long as it is unique if not it will cause `WriteError`_
 
   > db.collection.addOne({\_id: 'unique-id'})
 
-- Projection: Include or exclude data on mongo server
+* Projection: Include or exclude data on mongo server
 
   > db.collection.find({}, {name: 1, \_id: 0}) # include name and exclude \_id
 
-- Access embedded docs:
+* Access embedded docs:
   consider following JSON as document:
 
   ```json
@@ -50,30 +53,30 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 
   > db.collection.find({"details.tags": "sport"}) # array contains "sport"!
 
-- Projection:
+* Projection:
 
   > db.collection.find({}, {"details.tags": 1, age: 1, \_id: 0)}) # Projection
   > db.collection.find({'scores': {$gt: 20}}, {'tags.\$': 1}) # Array projection in this case only return the first element that is greater than 20 https://docs.mongodb.com/manual/reference/operator/projection/positional/#examples
   > db.collection.find({'genres': 'Drama'}, {genres: {$elemMach: {\$eq: 'Horror'}}}) # Array projection https://docs.mongodb.com/manual/reference/operator/projection/elemMatch/#zipcode-search
   > db.collection.find({'genres': 'Drama'}, {genres: {\$slice: [1, 2]}}) # [1, 2] means skip 1 element and return next 2 element
 
-* Load js script https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/
+- Load js script https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/
 
-* update vs updateMany: `update` find all elements matching filter and _replace_ them with provided data; however `updateMany` and `updateOne` throw error if no atomic operator provided; In general using `db.collection.replaceOne()` is recommended
+- update vs updateMany: `update` find all elements matching filter and _replace_ them with provided data; however `updateMany` and `updateOne` throw error if no atomic operator provided; In general using `db.collection.replaceOne()` is recommended
 
-* mongoimport https://docs.mongodb.com/guides/server/import/
+- mongoimport https://docs.mongodb.com/guides/server/import/
 
   > mongoimport --db test --collection restaurants --drop --file ./usr/mock/mock.json
 
   - `--jsonArray` If JSON document wrapped into array
 
-- limit() # Limit the number of retrieved data
+* limit() # Limit the number of retrieved data
 
   > db.collection.find().limit(5)
 
-- skip(): Skips the first n specified number
+* skip(): Skips the first n specified number
 
-* Searching nested arrays: Also consider following for searching array fields:
+- Searching nested arrays: Also consider following for searching array fields:
 
 > db.collection.addMany([{score: {title: 'A'}}, {score: {title: 'B'}}])
 > db.collection.find({'score.title': 'A'})
@@ -150,7 +153,7 @@ But there is a problem here; We're actually looking for a document that contains
 
 - \$or https://docs.mongodb.com/manual/reference/operator/query/or/#or-clauses-and-indexes
 
-  > db.collection.find({\$or: [{name: 'foo'}, {name: 'bar'}])
+  > db.collection.find({\$or: [{name: 'foo'}, {name: 'bar'}]})
 
   btw \$and operator syntax are exactly same
 
@@ -262,6 +265,77 @@ There the actual place that `$or` operator comes into the play `db.collection.fi
 
   > db.collection.insertOne({}, {writeConcern: {wtimeout: 200}}) // Time limit until to acknowledge result
 
+## Index
+
+Using indexes to retrieving a portion of document is efficient; But in order to reaching whole a vast majority of it; It just slow down the query excitation Because it's adding an extra step _Changing from IXSCAN to COLLSCAN_
+
+- explain()
+
+  > db.collection.explain('executionStats').find()
+  > db.collection.explain('allPlanExecution').find()
+
+- createIndex()
+
+  > db.collection.createIndex({'dob.age': 1}) // Accending age order
+  > db.collection.createIndex({gender:1, 'dob.age':1}) // Compound index consider the order is matter in compound index in this example docs will sorted first based on gender and then dob.age https://docs.mongodb.com/manual/core/index-compound/#sort-order
+
+- dropIndex()
+
+  > db.collection.dropIndex({'dob.age': 1})
+  > db.collection.dropIndex('index name')
+
+- getIndexes()
+
+  > db.collection.getIndexes()
+
+- createIndex options : https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/#options
+
+  > db.collection.createIndex({email: 1}, {unique: true}) // The document will no longer except insert or update values that matches the existing index value
+
+* partial Index https://docs.mongodb.com/manual/core/index-partial/#examples
+
+  > db.collection.createIndex({ age: 1}, { partialFilterExpression: {gender: 'male'}})
+
+* expireAfterSeconds
+
+It only works on Date object and single index not compound indexes
+
+> db.session.insertOne({createdAt: new Date()})
+> db.session.createIndex({createdAt: 1}, {expireAfterSeconds: 10}) // Delete document 10 sec after createdAt
+> db.session.insertOne({createdAt: new Date()})
+
+- Covered query
+  A covered query is a query that can be satisfied entirely using an index and does not have to examine any documents you can check covered query by it's `totalDocsExamined: 0` on `db.collection.explain('executionStats').your_query()` https://www.tutorialspoint.com/mongodb/mongodb\_covered\_queries.htm
+
+* Create index on the background:
+  Creating index in foreground _default behaviour_ cause mongo shell block other queries; But using background let query to resolve by server while indexes are creating
+  > db.collection.createIndex({description: 'text'}, {background: true})
+
+## Text Index
+
+**Text indexes an efficient alternative to regex search**:
+Essentially text is a special term of multiple-key indexes that turn a text field to an array of text in index each element
+
+> db.posts.createIndex({description: 'text'})
+> db.posts.find({$text: {$search: 'foo'}})
+> db.posts.find({$text: {$search: '"foo bar"'}}) // Consider using multi part words like "foo bar" into quote otherwise it will reflect all documents that contains 'foo' and 'bar'
+> db.posts.find({$text: {$search '-foo'}}) // Exclude the word using - sign
+
+- Sort text index
+
+> db.posts.find({$text: {$search: 'foo bar'}} ,{score: {$meta: 'textScore'}}).sort({score: {$meta: 'textScore' }}) // By adding score projection using \$meta and sort based on it
+
+- Create combined text indexes _Text indexes are expesive so consider following index not recommended_
+
+> db.posts.createIndex({title: 'text', description: 'text'})
+
+- default language, \$caseSensitive: https://docs.mongodb.com/manual/reference/text-search-languages/
+
+  > db.collection.createIndex({ description : 'text'}, {default_language: 'german', \$caseSensitive: true } )
+
+- weights: https://docs.mongodb.com/manual/tutorial/avoid-text-index-name-limit/#use-the-index-name-to-drop-a-text-index
+  > db.collection.createIndex({title: 'text', description: 'text'}, {weights: {text: 1, description : 10}})
+
 ## Manage mongo processes https://docs.mongodb.com/manual/tutorial/manage-mongodb-processes/
 
 - Running mongod on port
@@ -305,6 +379,8 @@ There the actual place that `$or` operator comes into the play `db.collection.fi
 - [] Validation actions in details
 - [] db.command()
 - [] write Concern and journal
+- [] **Indexing strategies https://docs.mongodb.com/manual/applications/indexes/**
+- [] **When to Use Multi Key indexes**
 
 ## Sundry
 
