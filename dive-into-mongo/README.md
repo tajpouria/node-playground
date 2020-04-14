@@ -56,8 +56,11 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 * Projection:
 
   > db.collection.find({}, {"details.tags": 1, age: 1, \_id: 0)}) # Projection
+  ---
   > db.collection.find({'scores': {$gt: 20}}, {'tags.\$': 1}) # Array projection in this case only return the first element that is greater than 20 https://docs.mongodb.com/manual/reference/operator/projection/positional/#examples
+---
   > db.collection.find({'genres': 'Drama'}, {genres: {$elemMach: {\$eq: 'Horror'}}}) # Array projection https://docs.mongodb.com/manual/reference/operator/projection/elemMatch/#zipcode-search
+---
   > db.collection.find({'genres': 'Drama'}, {genres: {\$slice: [1, 2]}}) # [1, 2] means skip 1 element and return next 2 element
 
 - Load js script https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/
