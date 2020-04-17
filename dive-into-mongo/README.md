@@ -1,4 +1,4 @@
-## Running a container
+# Running a container
 
 > docker pull mongo
 
@@ -56,12 +56,18 @@ This conversion happened by each languages MongoDB drivers. As an example of add
 * Projection:
 
   > db.collection.find({}, {"details.tags": 1, age: 1, \_id: 0)}) # Projection
+
   ---
+
   > db.collection.find({'scores': {$gt: 20}}, {'tags.\$': 1}) # Array projection in this case only return the first element that is greater than 20 https://docs.mongodb.com/manual/reference/operator/projection/positional/#examples
+
 ---
-  > db.collection.find({'genres': 'Drama'}, {genres: {$elemMach: {\$eq: 'Horror'}}}) # Array projection https://docs.mongodb.com/manual/reference/operator/projection/elemMatch/#zipcode-search
+
+> db.collection.find({'genres': 'Drama'}, {genres: {$elemMach: {\$eq: 'Horror'}}}) # Array projection https://docs.mongodb.com/manual/reference/operator/projection/elemMatch/#zipcode-search
+
 ---
-  > db.collection.find({'genres': 'Drama'}, {genres: {\$slice: [1, 2]}}) # [1, 2] means skip 1 element and return next 2 element
+
+> db.collection.find({'genres': 'Drama'}, {genres: {\$slice: [1, 2]}}) # [1, 2] means skip 1 element and return next 2 element
 
 - Load js script https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/
 
@@ -372,6 +378,48 @@ Essentially text is a special term of multiple-key indexes that turn a text fiel
   > mongod -f ./mongod.conf
 
 ## Data types https://data-flair.training/blogs/mongodb-data-types/
+
+## Working with GeoSpatial
+
+- Find places near an certain location:
+  Imagine Places Contains such documents following data in `GeoJSON` format https://docs.mongodb.com/manual/reference/geojson/:
+  ```json
+  [
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [-122.2, 21]
+      }
+    }
+  ]
+  ```
+
+First we need to Add GeoSpatial index:
+
+> db.places.createIndex({location : "2dsphere"})
+
+Then we can query `$near` places:
+
+> db.places.find({location : {\$near: {\$geometry : {type: 'Point', coordinates : [-3213.12, 312.23], $maxDistance: 500, $minDistance: 40}}}}) // min and max Distance is in meter
+
+- Find place in a certain polygon:
+
+> const p1 = [12,12], p2= [32,43] , p3=[12, 12], p4=[21,43] // Imagine we storing valid latitude and longitude for each point
+
+> db.palces.find({location: {$geoWithin: {$geometry: {type: 'Polygon', coordinates: [[p1,p2,p3,p4,p1]]}}}}) // insert the first point _p1 in this case_ to close the polygon
+
+- Find out if location is insider the area
+
+> const p1 = [12,12], p2= [32,43] , p3=[12, 12], p4=[21,43] // Imagine we storing valid latitude and longitude for each point
+
+> db.polygons.insertOne({name: 'my polygon', polygon: {type: 'Polygon', coordinates: [[p1,p2,p3,p4,p1]]}})
+> db.polygon.createIndex({polygon: '2dsphere'})
+
+> db.polygon.find({ polygon : {$geoIntersects: {$geometry: {type: 'Point', coordinates: [2141.312, 3214321.1]}}}}) // This returns all the polygon that this point is intersects with it also can be used to check a polygon intersects with another one
+
+> Finding places within a certain radius
+
+> db.places.find({location: {$geoWithin: {$centerSphere: [[-122.32, 431], 1 / 6378.1]}}) // First argument is center coordinates of sphere and second argument is radius in kilometer
 
 ## To Read
 
