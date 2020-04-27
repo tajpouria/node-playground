@@ -421,6 +421,59 @@ Then we can query `$near` places:
 
 > db.places.find({location: {$geoWithin: {$centerSphere: [[-122.32, 431], 1 / 6378.1]}}) // First argument is center coordinates of sphere and second argument is radius in kilometer
 
+## Aggregation framework
+
+- \$match:
+
+  > db.persons.aggregate([{$match:{$or: [ {'dob.age': {$gte: 50}}, {'dob.age': {$lte: 20}}]}}]).pretty()
+
+- \$group:
+
+  > db.persons.aggregate([{$group: {\_id: '$location.state', totalCount: {$sum: 1}}}, {$sort: {totalCount: 1}}])
+  > db.friends.aggregate([{ $group: { \_id: '$age', allHobbies: {$push: '$hobbies'}}}]) // $push element to group array; Use $addtoSet in case you don't want duplicate values
+
+* \$project:
+
+  > db.persons.aggregate([{$project: {gender: 1, fullName: {$concat: ['$name.first', ' ', '$name.last']}, 'dob.age': 1}}]).pretty()
+
+  convert
+
+  > db.persons.aggregate([{ $project: { \_id: 0, location: { type: 'Point', coordinates: [{ $convert: { input: '$location.coordinates.longitude', to: 'decimal'}}, { $convert: { input: '\$location.coordiantes.latitude', to: 'decimal', onError: 0, onNull: 0}}]}}}]) // \$convert: https://docs.mongodb.com/manual/reference/operator/aggregation/convert/
+
+  > db.persons.aggregate([{$project: { birthDate: {$convert: {input: '$dob.date', to: 'date', onNull: new Date(), onError: new Date()}}, age: '$dob.age'}}])
+
+  isWeekYear
+
+  > db.persons.aggregate([{$project: {birthDate: {$toDate: '$dob.date'}}}, {$group: {\_id: {birthYear: {$isoWeekYear: '$birthDate'}}, numsPersons: {$sum: 1}}}, {$sort: {numsPerson: -1}}])
+
+  slice
+
+  > db.friends.aggregate([{$project: {\_id: 0, examScores: {$slice: ['$examScores', 1, 1]}}}]) // [array to slice, start from position, slice to]
+
+  size Length of the array
+
+  > db.friends.aggregate([{$project: {\_id: 0, name: 1 ,scoresSize: { $size: '$examScores' }}}])
+
+filter
+
+> db.friends.aggregate([{$project: {\_id: 0, scores: { $filter: { input: '$examScores', as: 'sc', cond: { $gt: ['$$sc.score', 60] } } } }}])
+
+max
+
+> db.friends.aggregate([{$project: {\_id: 0, name: 1, maxScore: {$max: '$examScores.score'}}}])
+
+- \$bucket: https://docs.mongodb.com/manual/reference/operator/aggregation/bucket/index.html
+
+> db.persons.aggregate([{$bucketAuto: { groupBy: '$dob.age', buckets: 5, boundaries: [20, 30, 40], output: { numsPerson: {$sum: 1 }, average: {$avg: '\$dob.age'}}}}])
+
+- \$bucketAuto
+
+> db.persons.aggregate([{$bucketAuto: { groupBy: '$dob.age', buckets: 5, output: { numsPerson: {$sum: 1 }, average: {$avg: '$dob.age'}}}}])
+
+- \$out Writing aggregation result into a new collection
+
+> db.friends.aggregation([{$project: {\_id: 0, name: 1}}, {$out: 'transformedFriends'}])
+
 ## To Read
 
 - [] How mongo actually works behind the scene
