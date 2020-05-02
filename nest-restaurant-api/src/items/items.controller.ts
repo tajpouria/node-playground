@@ -6,7 +6,9 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 import { ItemsService } from './items.service';
 import { Item } from '../item';
@@ -24,18 +26,21 @@ export class ItemsController {
   @Get(':id')
   async find(@Param('id') id: number): Promise<Item> {
     return this.itemsService.find(id);
-  }   
+  }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   create(@Body('item') item: Item): Item {
     return this.itemsService.create(item);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put()
   update(@Body('item') item: Item): Item | null {
     return this.itemsService.update(item);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   delete(@Param('id') id: number): true | null {
     return this.itemsService.delete(id);
