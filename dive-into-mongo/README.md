@@ -474,6 +474,33 @@ max
 
 > db.friends.aggregation([{$project: {\_id: 0, name: 1}}, {$out: 'transformedFriends'}])
 
+## Working with Numbers
+
+- int32 -2,147,483,648 to 2,147,483,647
+- int64 -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807
+- double64 Mongo shell store store numbers in double64 format by default because it's use javascript
+  > db.numtest.insertOne({a: 1}) // Since we're using mongo shell 1 stores as double64
+- double128 high precision double
+
+**I all of following cases you can you use both number and string as n argument, But it recommended to use always use string _Essentially beacuse number in javascript have double64 limitation_**
+
+- NumberInt(n) int32
+
+  > db.numtest.insertsOne({a: NumberInt("23")})
+
+- NumberLong(n) int64
+
+  > db.numtest.insertsOne({a: NumberLong("123123"))
+
+- Doing Math
+  Always consider to use same type in calculation for exact result for example:
+
+  > db.numtest.insertOne({a: NumberLong("12")}) // Storing 12 as int64
+  > db.numtest.UpdateOne({}, {\$inc: NumberLong("1")}) // Using also int64 to increment 12
+
+- NumberDecimal(n) Decimal128bit _High precision doubles_
+  > db.numtest.insertOne({a: NumberDecimal("2121.122")})
+
 ## To Read
 
 - [] How mongo actually works behind the scene
