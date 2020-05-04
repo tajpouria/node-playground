@@ -482,7 +482,7 @@ max
   > db.numtest.insertOne({a: 1}) // Since we're using mongo shell 1 stores as double64
 - double128 high precision double
 
-**I all of following cases you can you use both number and string as n argument, But it recommended to use always use string _Essentially beacuse number in javascript have double64 limitation_**
+**In all of the following cases you can use both number and string as `n` argument, But it recommended to use string _Essentially beacuse number in javascript have double64 limitation_**
 
 - NumberInt(n) int32
 
