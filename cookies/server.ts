@@ -5,7 +5,7 @@ const app = express();
 const PORT = 8080;
 
 app.get("/", (_req, res) => {
-  res.setHeader("set-cookie", ["from=server", "another_one=from_server"]);
+  res.setHeader("Set-Cookie", ["from=server", "another_one=from_server", 'js-can-see=false; HttpOnly']);
 
   res.sendFile(`${__dirname}/index.html`);
 });

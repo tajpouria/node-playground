@@ -68,3 +68,71 @@ Cookie: hello=world; foo=bar; very=easy; server; from=server; another_one=from_s
 // Only send to with requests to domain/path-1
 document.cookie = "path=1; path=/path-1";
 ```
+
+- expires, max-age
+
+If not specified cookies will removed whenever browser is closed (session cookie)
+
+expires _deprecated_ an expiry date for when a cookie gets deleted
+max-age sets the time in **seconds** for when a cookie will be deleted (use this, it’s no longer 2009)
+Internet Explorer (ie6, ie7, and ie8) does not support “max-age”, while (mostly) all browsers support expires
+
+```js
+const d = new Date();
+d.setTime(d.getTime() + 5 * 60 * 1000);
+document.cookie = `foo=bar; expires=${d.toGMTString()};`;
+
+document.cookie = `foo=bar; max-age=${5 * 60}`;
+```
+
+- SameSite
+
+  - Lax _default_ Cookies are allowed to be sent with top-level navigations and will be sent along with GET request initiated by third party website.
+
+  - None Cookies will be sent in all contexts, i.e sending cross-origin is allowed.
+
+  - Strict Cookies will only sent if the request was made from the same context
+
+```js
+document.cookie = "foo=bar; SameSite=Strict";
+```
+
+### Cookie types
+
+Following is not official arrangement
+
+- Session cookies: Cookies that not have expires or max-age property and will removed whenever browser is closed
+
+- Permanent cookies: Cookies that have expires or max-age and will not removed whenever browser is closed
+
+- HttpOnly cookies
+
+If the HttpOnly flag (optional) is included in the **HTTP response** (server-side) header, the cookie cannot be accessed through client side script (again if the browser supports this flag)
+
+```js
+(_, res) => {
+  res.setHeader("Set-Cookie", "http=only; HttpOnly;");
+};
+```
+
+Client can not access this HttpOnly cookies through `document.cookie` but they are sent with each request
+
+- Secure cookies
+
+Only sent to site to `https` domains
+
+```js
+(_, res) => {
+  res.setHeader(
+    ("Set-Cookie": "id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Secure;")
+  );
+};
+```
+
+- Third party cookies
+
+Third-party cookies are cookies that are set by a website other than the one you are currently on. For example, you can have a "Like" button on your website which will store a cookie on visitor's computer, that cookie can later be accessed by Facebook to identify visitor and see which websites he visited. Such cookie is considered to be a third-party cookie.
+
+Another example would be an advertising service which also creates a third-party cookie to monitor which websites were visited by each user.
+
+- Zombie cookies
