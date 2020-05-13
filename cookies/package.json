@@ -6,8 +6,15 @@
   "dependencies": {
     "@types/express": "^4.17.6",
     "@types/node": "^13.13.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "mongoose": "^5.9.13",
+    "sqlite3": "^4.2.0",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3"
+  },
+  "devDependencies": {
+    "@types/sqlite3": "^3.1.6",
+    "nodemon": "^2.0.3"
   }
 }

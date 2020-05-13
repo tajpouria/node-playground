@@ -5,3 +5,4 @@ pg-data/
 **/out
 **/.vscode
 **/dist/
+./cookies/implementation101/server/chinook.db
