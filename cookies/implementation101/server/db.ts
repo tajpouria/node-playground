@@ -1,10 +1,13 @@
-import * as sqlite3 from "sqlite3";
+import * as mongoose from "mongoose";
 
-sqlite3.verbose();
+export const connectToDB = async () => {
+  await mongoose.connect(
+    `mongodb+srv://tajpouria:${process.env.DB_PASS}@cluster0-xfsa2.mongodb.net/test?retryWrites=true`,
+    { useNewUrlParser: true, useUnifiedTopology: true },
+    err => {
+      if (err) throw err;
 
-export const db = new sqlite3.Database("./chinook.db", err => {
-  if (err) {
-    console.error(err.message);
-  }
-  console.log("Connected to the chinook database.");
-});
+      console.info("Connected to DB");
+    }
+  );
+};
