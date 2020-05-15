@@ -7,7 +7,7 @@ import * as mongoose from "mongoose";
 dotenv.config();
 
 import { connectToDB } from "./db";
-import { usersController } from "./controllers";
+import { usersController, sessionController } from "./controllers";
 
 (async () => {
   try {
@@ -16,7 +16,9 @@ import { usersController } from "./controllers";
     const MongoStore = connectStore(session);
 
     const app = express();
+
     app.disable("x-powered-by");
+
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(
@@ -28,12 +30,12 @@ import { usersController } from "./controllers";
         store: new MongoStore({
           mongooseConnection: mongoose.connection,
           collection: "session",
-          ttl: +process.env.SESS_LIFETIME
+          ttl: parseInt(process.env.SESS_LIFETIME)
         }),
         cookie: {
           sameSite: true,
           secure: process.env.NODE_ENV === "production",
-          maxAge: +process.env.SESS_LIFETIME
+          maxAge: parseInt(process.env.SESS_LIFETIME)
         }
       })
     );
@@ -42,6 +44,7 @@ import { usersController } from "./controllers";
 
     app.use("/api", apiController);
     apiController.use("/users", usersController);
+    apiController.use("/session", sessionController);
 
     const port = process.env.PORT;
     app.listen(port, () => {

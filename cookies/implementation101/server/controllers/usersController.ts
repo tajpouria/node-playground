@@ -3,7 +3,7 @@ import * as Joi from "joi";
 
 import { userValidators } from "../validators";
 import { User } from "../models";
-import { sessionizedUser } from "../helpers";
+import { sessionizedUser, parseError } from "../helpers";
 
 const usersController = express.Router();
 
@@ -18,9 +18,9 @@ usersController.post("/", async (req, res) => {
 
     req.session.user = sessionUser;
 
-    res.send(sessionUser);
+    res.status(201).send(sessionUser);
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send(parseError(err));
   }
 });
 
