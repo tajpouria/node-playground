@@ -7,8 +7,6 @@ export default () => {
   const { values, handleChange } = useHandleChange<User>({
     username: "",
     password: "",
-    email: "",
-    repeatPassword: "",
   });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

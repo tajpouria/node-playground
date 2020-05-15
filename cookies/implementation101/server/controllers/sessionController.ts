@@ -14,7 +14,6 @@ sessionController.post("/", async (req, res) => {
     await validate(req.body, userValidators.signIn);
 
     const user = await User.findOne({ username });
-
     if (user && user.comparePasswords(password)) {
       const sessionUser = sessionizedUser(user);
       req.session.user = sessionUser;
@@ -43,6 +42,12 @@ sessionController.delete("/", (req, res) => {
 });
 
 sessionController.get("/", (req, res) => {
+  res.setHeader("Set-Cookie", [
+    "from=server",
+    "another_one=from_server",
+    "js-can-see=false; HttpOnly",
+  ]);
+
   res.json({ user: req.session.user });
 });
 

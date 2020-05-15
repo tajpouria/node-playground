@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 import * as session from "express-session";
 import * as connectStore from "connect-mongo";
 import * as mongoose from "mongoose";
+import * as cors from "cors";
 
 dotenv.config();
 
@@ -17,8 +18,6 @@ import { usersController, sessionController } from "./controllers";
 
     const app = express();
 
-    app.disable("x-powered-by");
-
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(
@@ -30,14 +29,14 @@ import { usersController, sessionController } from "./controllers";
         store: new MongoStore({
           mongooseConnection: mongoose.connection,
           collection: "session",
-          ttl: parseInt(process.env.SESS_LIFETIME)
+          ttl: parseInt(process.env.SESS_LIFETIME),
         }),
         cookie: {
           sameSite: true,
           secure: process.env.NODE_ENV === "production",
-          maxAge: parseInt(process.env.SESS_LIFETIME)
-        }
-      })
+          maxAge: parseInt(process.env.SESS_LIFETIME),
+        },
+      }),
     );
 
     const apiController = express.Router();
