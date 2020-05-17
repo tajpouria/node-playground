@@ -1,8 +1,10 @@
 import {
   Application,
   Router,
-  RouterMiddleware
+  RouterMiddleware,
 } from "https://deno.land/x/oak/mod.ts";
+
+import cors from "../../deno-cors/mod.ts";
 
 const env = Deno.env.toObject();
 const PORT = env.PORT || 4000;
@@ -11,9 +13,11 @@ const HOST = env.HOST || "127.0.0.1";
 const router = new Router();
 const app = new Application();
 
+app.use(cors());
+
 const dogs = [
   { id: 1, name: "foo" },
-  { id: 2, name: "bar" }
+  { id: 2, name: "bar" },
 ];
 
 const getDogs: RouterMiddleware = ({ response }) => {
@@ -25,7 +29,7 @@ const getDog: RouterMiddleware = ({ response, params }) => {
     const { name } = params;
 
     if (name) {
-      const dog = dogs.find(d => d.name.toLowerCase() === name.toLowerCase());
+      const dog = dogs.find((d) => d.name.toLowerCase() === name.toLowerCase());
 
       if (dog) {
         response.status = 200;
@@ -62,10 +66,7 @@ const addDog: RouterMiddleware = async ({ request, response }) => {
   }
 };
 
-router
-  .get("/dogs", getDogs)
-  .get("/dogs/:name", getDog)
-  .post("/dogs", addDog);
+router.get("/dogs", getDogs).get("/dogs/:name", getDog).post("/dogs", addDog);
 
 app.use(router.routes());
 app.use(router.allowedMethods());

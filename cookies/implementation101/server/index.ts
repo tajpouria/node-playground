@@ -18,6 +18,8 @@ import { usersController, sessionController } from "./controllers";
 
     const app = express();
 
+    app.use(cors());
+
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(
@@ -29,14 +31,14 @@ import { usersController, sessionController } from "./controllers";
         store: new MongoStore({
           mongooseConnection: mongoose.connection,
           collection: "session",
-          ttl: parseInt(process.env.SESS_LIFETIME),
+          ttl: parseInt(process.env.SESS_LIFETIME)
         }),
         cookie: {
           sameSite: true,
           secure: process.env.NODE_ENV === "production",
-          maxAge: parseInt(process.env.SESS_LIFETIME),
-        },
-      }),
+          maxAge: parseInt(process.env.SESS_LIFETIME)
+        }
+      })
     );
 
     const apiController = express.Router();

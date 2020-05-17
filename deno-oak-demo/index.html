@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page Title</title>
+  </head>
+  <body>
+    <h1>This is a Heading</h1>
+    <p>This is a paragraph.</p>
+    <button id="btn">CORS policy</button>
+  </body>
+  <script>
+    document.getElementById("btn").addEventListener("click", () =>
+      fetch("http://127.0.0.1:4000/dogs")
+        .then(res => res.json())
+        .then(res => console.info(res))
+    );
+  </script>
+</html>
