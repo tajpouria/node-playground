@@ -4,7 +4,7 @@ import {
   RouterMiddleware,
 } from "https://deno.land/x/oak/mod.ts";
 
-import cors from "../../deno-cors/mod.ts";
+import { oakCors } from "../../deno-cors/mod.ts";
 
 const env = Deno.env.toObject();
 const PORT = env.PORT || 4000;
@@ -13,7 +13,7 @@ const HOST = env.HOST || "127.0.0.1";
 const router = new Router();
 const app = new Application();
 
-app.use(cors());
+app.use(oakCors());
 
 const dogs = [
   { id: 1, name: "foo" },
