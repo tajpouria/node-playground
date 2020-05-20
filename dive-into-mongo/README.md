@@ -501,6 +501,133 @@ max
 - NumberDecimal(n) Decimal128bit _High precision doubles_
   > db.numtest.insertOne({a: NumberDecimal("2121.122")})
 
+## Security
+
+Authentication is disabled by default:
+
+### Running enabled authentication mongod server
+
+> mongod --auth
+
+mongo image:
+
+> docker run -d --name mongodb mongo --auth
+
+### Enable Access Control
+
+https://docs.mongodb.com/manual/tutorial/enable-authentication/
+
+Create the user administrator:
+
+```js
+use admin
+db.createUser(
+  {
+    user: "admin",
+    pwd:  "admin",
+    roles: ["userAdminAnyDatabase"]
+  }
+)
+```
+
+Connect and authenticate as the user administrator:
+
+```js
+use admin
+db.auth("admin", "admin")
+```
+
+or
+
+> mongo --port 27017 --authenticationDatabase "admin" -u "admin" -p "admin"
+
+**Caveates** You have to logout from previous user before login as new user using `db.logout()`
+
+another examples
+
+```js
+use db shop
+
+db.createUser(
+  {
+    user: "dev",
+    pwd:  "dev",
+    roles: ["readWrite"]
+  }
+)
+
+use admin
+
+db.logout() // logout from admin
+
+use shop
+
+db.auth('dev', 'dev')
+
+db.collection.insertOne({name: 'foo'})
+```
+
+## UpdateUser
+
+```js
+use db admin
+
+db.auth('admin', 'admin')
+
+use db shop
+
+db.createUser(
+  {
+    user: "dev",
+    pwd:  "dev",
+    roles: ["readWrite"]
+  }
+)
+
+use admin
+
+db.logout() // logout from admin
+
+use shop
+
+db.auth('dev', 'dev')
+
+db.collection.insertOne({name: 'foo'})
+
+
+// Assume we want to also add readWrite to post db to 'dev' user
+
+
+db.logout() // logout from dev
+
+use admin
+
+db.auth('admin', 'admin')
+
+use shop
+
+db.updateUser('dev', {
+  roles: ['readWrite', { db: 'post', role: 'readWrite'}],
+  })
+
+use admin
+
+db.logout() // logout from admin
+
+use shop
+
+db.auth('dev, 'dev')
+
+use post
+
+db.collection.insertOne({name: 'foo'})
+
+db.getUser('dev')
+
+{ "_id" : "shop.dev", "userId" : UUID("93091dc5-6736-47ee-8623-ee0e4dd44e51"), "user" : "dev", "db" : "shop", "roles" : [ { "role" : "readWrite", "db" : "shop" }, { "role" : "readWrite", "db" : "post" } ], "mechanisms" : [ "SCRAM-SHA-1", "SCRAM-SHA-256" ]}
+
+```
+
 ## To Read
 
 - [] How mongo actually works behind the scene
