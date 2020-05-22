@@ -1,5 +1,0 @@
-{
-  "watch": ["./implementation101/server"],
-  "ext": "ts",
-  "exec": "ts-node ./implementation101/server/index.ts"
-}
