@@ -1,0 +1,33 @@
+{
+  "name": "tajpouria-mss-utils",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "author": "Pouria Tajdivand<tajpouria.dev@gmail.com>",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": { 
+  "clean": "rm -rf ./node_modules dist/ yarn.lock package-lock.json",
+    "tsc": "tsc",
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "start:tsc": "tsc -W",
+    "start": "concurrently npm:start:*"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/winston": "^2.4.4",
+    "concurrently": "^5.2.0",
+    "nodemon": "^2.0.4",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "winston": "^3.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tajpouria/microservices-with-node-series.git"
+  }
+}

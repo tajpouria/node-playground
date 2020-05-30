@@ -6,5 +6,7 @@ pg-data/
 **/.vscode
 **/dist/
 **/.cache/
+**/*.log
 ./cookies/implementation101/server/chinook.db
-
+**/package-lock.json
+**/tsconfig.tsbuildinfo

@@ -1,0 +1,15 @@
+{
+  "name": "simple-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "tajpouria-mss-utils": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/node": "^14.0.6",
+    "typescript": "^3.9.3"
+  }
+}
