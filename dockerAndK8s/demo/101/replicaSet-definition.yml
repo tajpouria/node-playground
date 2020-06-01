@@ -1,0 +1,23 @@
+apiVersion: "apps/v1"
+kind: "ReplicaSet"
+metadata:
+  name: "foo-replicaset"
+  labels:
+    app: "foo"
+    tier: "cache"
+spec:
+  template:
+    metadata:
+      name: "foo-redis"
+      labels:
+        app: "foo"
+        tier: "cache"
+    spec:
+      containers:
+        - name: "redis"
+          image: "redis:latest"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "foo"
+      tier: "cache"
