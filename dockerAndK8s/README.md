@@ -237,3 +237,63 @@ Consider to use `--record` flag to record CHANGE-CAUSE on revision history
 - delete
 
   > kubectl delete deployment foo-deployment
+
+### Networking
+
+Consider Node IP, internal private network IP and each Pod IP
+
+![Networking](./assets/networking.png)
+
+### Service
+
+#### type: NodePort
+
+Make Internal Pod(s) accessible on an port on node
+![NodePort](./assets/nodePort.png)
+
+service-definition.yml
+
+```yml
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "foo-service"
+spec:
+  type: "NodePort"
+  ports:
+    - targetPort: 80
+      port: 80
+      nodePort: 30008 # Between 30000 up to 32767
+  selector:
+    app: "foo-app"
+    type: "back-end"
+```
+
+- create
+
+  > kubectl create -f service-definition.yml
+
+#### type: ClusterIP
+
+Allow every other object **inside** the cluster to access the object that clusterIP pointing at
+
+```yml
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "foo-service"
+spec:
+  type: "ClusterIP" # Default type value is ClusterIP
+  ports:
+    - targetPort: 80
+      port: 80
+  selector:
+    app: "foo"
+    type: "back-end"
+```
+
+- create
+
+  > kubectl create -f service-definition.yml
+
+#### type: LoadBalancer

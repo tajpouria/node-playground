@@ -4,20 +4,20 @@ metadata:
   name: "foo-deployment"
   labels:
     app: "foo"
-    tier: "cache"
+    tier: "front-end"
 spec:
   template:
     metadata:
       name: "foo-pod"
       labels:
         app: "foo"
-        tier: "cache"
+        tier: "front-end"
     spec:
       containers:
-        - name: "redis"
-          image: "redis:latest"
-  replicas: 6
+        - name: "nginx"
+          image: "nginx:latest"
+  replicas: 3
   selector:
     matchLabels:
       app: "foo"
-      tier: "cache"
+      tier: "front-end"
