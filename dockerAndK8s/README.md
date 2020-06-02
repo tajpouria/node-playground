@@ -1,4 +1,4 @@
-### K8S
+## K8S
 
 #### Components https://kubernetes.io/docs/concepts/overview/components/
 
@@ -22,13 +22,13 @@
 
   > kubectl get all
 
-#### Node
+### Node
 
 - get
 
   > kubectl get nodes
 
-#### Pod
+### Pod
 
 A Pod encapsulates an application’s container (or, in some cases, multiple containers), storage resources, a unique network identity (IP address), as well as options that govern how the container(s) should run
 
@@ -52,21 +52,17 @@ spec:
 
   > kubectl create -f pod-definition.yml
 
-- run
-
-  > kubectl run POD_NAME --image=POD_IMAGE
-
-- get
+* get
 
   > kubectl get pods -o wide # Retrieves NODE and IP as well
 
-- describe
+* describe
 
   > kubectl describe pod
 
   > kubectl describe pod foo-pod
 
-- delete
+* delete
 
   > kubectl delete pod redis
 
@@ -146,6 +142,10 @@ spec:
 
   > kubectl delete replicaset foo-replicaset
 
+- run
+
+  > kubectl run POD_NAME --image=POD_IMAGE
+
 #### Scale replication
 
 In order to change(increase/decrease) the number of replication consider one the following methods:
@@ -159,3 +159,81 @@ In order to change(increase/decrease) the number of replication consider one the
   > kubectl scale --replicas=6 -f rc-definition.yml
 
   > kubectl scale --replicas=6 replicaset foo-replicaSet
+
+### Deployment
+
+You describe a desired state in a Deployment, and the Deployment Controller changes the actual state to the desired state at a controlled rate. You can define Deployments to create new ReplicaSets, or to remove existing Deployments and adopt all their resources with new Deployments.
+
+The following are typical use cases for Deployments:
+
+- Create a Deployment to rollout a ReplicaSet. The ReplicaSet creates Pods in the background. Check the status of the rollout to see if it succeeds or not.
+- Declare the new state of the Pods by updating the PodTemplateSpec of the Deployment. A new ReplicaSet is created and the Deployment manages moving the Pods from the old ReplicaSet to the new one at a controlled rate. Each new ReplicaSet updates the revision of the Deployment.
+- Rollback to an earlier Deployment revision if the current state of the Deployment is not stable. Each rollback updates the revision of the Deployment.
+- Scale up the Deployment to facilitate more load.
+- Pause the Deployment to apply multiple fixes to its PodTemplateSpec and then resume it to start a new rollout.
+- Use the status of the Deployment as an indicator that a rollout has stuck.
+  Clean up older ReplicaSets that you don’t need anymore.
+
+deployment-definition.yml
+
+```yml
+apiVersion: "apps/v1"
+kind: "Deployment"
+meta-data:
+  name: "foo-deployment"
+  labels:
+    app: "foo"
+    tier: "back-end"
+spec:
+  template:
+    metadata:
+      name: "foo"
+      labels:
+        app: "foo"
+        tier: "back-end"
+    spec:
+      containers:
+        - name: "express-server"
+          image: "tajpouria/express-server:latest"
+  replicas: 3
+  selectors:
+    matchLabels:
+      app: "foo"
+      tier: "back-end"
+```
+
+- create
+
+  > kubectl create -f deployment-definition.yml --record
+
+Consider to use `--record` flag to record CHANGE-CAUSE on revision history
+
+- get
+
+  > kubectl get deployments
+
+- update
+
+  > kubectl apply -f deployment-definition.yml --record
+
+Consider to use `--record` flag to record CHANGE-CAUSE on revision history
+
+> kubectl set image deployment/foo-deployment redis=redis:1.2.3
+
+- status
+
+  > kubectl rollout status deployment/foo-deployment
+
+  > kubectl rollout history deployment/foo-deployment
+
+- rollout
+
+  > kubectl rollout undo deployment/foo-deployment
+
+- describe
+
+  > kubectl describe deployment foo-deployment
+
+- delete
+
+  > kubectl delete deployment foo-deployment

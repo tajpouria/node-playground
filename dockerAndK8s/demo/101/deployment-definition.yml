@@ -1,0 +1,23 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "foo-deployment"
+  labels:
+    app: "foo"
+    tier: "cache"
+spec:
+  template:
+    metadata:
+      name: "foo-pod"
+      labels:
+        app: "foo"
+        tier: "cache"
+    spec:
+      containers:
+        - name: "redis"
+          image: "redis:latest"
+  replicas: 6
+  selector:
+    matchLabels:
+      app: "foo"
+      tier: "cache"
