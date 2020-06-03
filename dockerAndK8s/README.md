@@ -22,6 +22,12 @@
 
   > kubectl get all
 
+- -o wide
+
+  > kubectl get all -o wide
+
+Retrieve more information
+
 ### Node
 
 - get
@@ -46,6 +52,8 @@ spec:
   containers:
     - name: "redis"
       image: "redis:latest"
+      ports:
+        - containerPort: 80
 ```
 
 - create
@@ -54,7 +62,7 @@ spec:
 
 * get
 
-  > kubectl get pods -o wide # Retrieves NODE and IP as well
+  > kubectl get pods
 
 * describe
 
