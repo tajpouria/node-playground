@@ -34,6 +34,16 @@ Retrieve more information
 
 Use all the definition from . directory to create kubernetes object(s)
 
+- exec
+  
+  > kubectl exec -it foo-pod sh
+
+Execute command against a Pod
+
+- logs
+
+  > kubectl logs pod/foo-pod
+
 ### Node
 
 - get
