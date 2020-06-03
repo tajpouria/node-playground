@@ -22,11 +22,17 @@
 
   > kubectl get all
 
-- -o wide
+- get -o wide
 
   > kubectl get all -o wide
 
 Retrieve more information
+
+- create -f .
+
+  > kubectl create -f .
+
+Use all the definition from . directory to create kubernetes object(s)
 
 ### Node
 
@@ -256,7 +262,7 @@ Consider Node IP, internal private network IP and each Pod IP
 
 #### type: NodePort
 
-Make Internal Pod(s) accessible on an port on node
+Make Internal Pod(s) accessible on an port on node **Only for development purposes**
 ![NodePort](./assets/nodePort.png)
 
 service-definition.yml
@@ -305,3 +311,22 @@ spec:
   > kubectl create -f service-definition.yml
 
 #### type: LoadBalancer
+
+Handle load balancing between different Node and Pods on supported platform like GoogleCloudPlatform
+
+![LoadBalancer](./assets/loadBalancer.png)
+
+```yml
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "foo-service"
+spec:
+  type: "LoadBalancer"
+  ports:
+    - targetPort: 3000
+      port: 80
+  selector:
+    app: "foo"
+    type: "front-end"
+```
