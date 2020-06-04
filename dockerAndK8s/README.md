@@ -70,6 +70,11 @@ spec:
       image: "redis:latest"
       ports:
         - containerPort: 80
+      env:
+    - name: DEMO_GREETING
+      value: "Hello from the environment"
+    - name: DEMO_FAREWELL
+      value: "Such a sweet sorrow"
 ```
 
 - create
