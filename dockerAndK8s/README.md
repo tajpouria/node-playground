@@ -249,6 +249,10 @@ Consider to use `--record` flag to record CHANGE-CAUSE on revision history
 
 > kubectl set image deployment/foo-deployment redis=redis:1.2.3
 
+- restart
+
+  > kubectl rollout restart deployment/foo-deployment
+
 - status
 
   > kubectl rollout status deployment/foo-deployment
