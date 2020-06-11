@@ -35,7 +35,7 @@ Retrieve more information
 Use all the definition from . directory to create kubernetes object(s)
 
 - exec
-  
+
   > kubectl exec -it foo-pod sh
 
 Execute command against a Pod
@@ -348,4 +348,28 @@ spec:
   selector:
     app: "foo"
     type: "front-end"
+```
+
+### Secret
+
+- create
+
+  > kubectl create secret generic SECRET_OBJECT_NAME --from-literal=SECRET_KEY=SECRET_VALUE
+
+- get
+
+  > kubectl get secret
+
+### Reference secret from a container
+
+```yml
+containers:
+  - name: "express-server"
+    image: "tajpouria/express-server:latest"
+    env:
+      - name: SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: SECRET_OBJECT_NAME
+            key: SECRET_KEY
 ```
