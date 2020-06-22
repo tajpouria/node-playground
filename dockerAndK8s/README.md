@@ -373,3 +373,26 @@ containers:
             name: SECRET_OBJECT_NAME
             key: SECRET_KEY
 ```
+
+### Namespace
+
+- get
+
+  > kubectl get namespace
+
+- get services running on a namespaces
+
+  > kubectl get service -n NAMESPACE*NAME*
+
+Working with minikube all the different object that we making inside the cluster is running on a namespace called `default`
+
+**The critical point about the namespace is that we cannot access services that running inside the namespace A from namespace B; The same fashion we access services inside the same name space**
+
+for example, We **Cannot** access an clusterIP service that running on namespace ingress-nginx from namespace default using just that clusterIP name
+
+### Cross namespace communication
+
+Service running on namespace is accessible on host:
+`http://SERVICE_NAME.NAMESPACE_NAME.svc.cluster.local`
+
+![namespace](./assets/namespace.png)
