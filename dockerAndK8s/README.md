@@ -224,6 +224,8 @@ spec:
       containers:
         - name: "express-server"
           image: "tajpouria/express-server:latest"
+          command: ["printenv"] # The command and arguments that you define in the configuration file override the default command and arguments provided by the container image. If you define args, but do not define a command, the default command is used with your new arguments.
+          args: ["-u", "foo@foo.com", "-f"]
   replicas: 3
   selectors:
     matchLabels:
