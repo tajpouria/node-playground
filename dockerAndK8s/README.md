@@ -38,6 +38,10 @@ Use all the definition from . directory to create kubernetes object(s)
 
   > kubectl exec -it foo-pod sh
 
+- port-forward
+
+  > kubectl port-forward foo-pod 4222:4222 # Kinda temporary node-port strictly for dev purposes
+
 Execute command against a Pod
 
 - logs
