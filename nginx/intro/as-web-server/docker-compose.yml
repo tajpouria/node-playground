@@ -1,0 +1,10 @@
+version: "3"
+services:
+  nginx:
+    image: "nginx:alpine"
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "8000:8000"
+    volumes:
+      - "./nginx:/etc/nginx"
