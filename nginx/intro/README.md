@@ -9,11 +9,11 @@
 
 ## Common commands
 
-Start
+- Start
 
-> nginx
+  > nginx
 
-Send signals
+- Send signals
 
 > nginx -s reload
 > nginx -s stop
