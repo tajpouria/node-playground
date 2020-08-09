@@ -1,11 +1,12 @@
-## Networking
-[X] What is UDP?
-[] What is TLS and why use TLS v1.3?
-[] What is SSL/TLS and how SSL certificate works?
+#Networking
+[x] What is UDP?
+[x] What is TLS and why use TLS v1.3?
+[x] What is SSL/TLS and how SSL certificate works?
 [] What is HTTP2 and why use it?
 [] Hands-on SSH
 [] What is Telnet?
 [] layer 4 vs layer 7 proxy?
+[] SNI
 
 ## SDLC
 [] GRPC
@@ -14,8 +15,8 @@
 [] Sharding
 
 ## Node
-[] NodeJS TLS(SSL)
-[] Node HTTP
+[x] Node HTTPS
+[x] Node HTTP
 [] Node clustering
 [] Node Repl
 [] Map 2 array intersect
