@@ -3,9 +3,9 @@
 [x] What is TLS and why use TLS v1.3?
 [x] What is SSL/TLS and how SSL certificate works?
 [] What is HTTP2 and why use it?
-[] Hands-on SSH
+[x] Hands-on SSH
 [] What is Telnet?
-[] layer 4 vs layer 7 proxy?
+[x] layer 4 vs layer 7 proxy?
 [] SNI
 
 ## SDLC
