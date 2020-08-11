@@ -21,6 +21,7 @@
 [] Node Repl
 [] Map 2 array intersect
 [] JS event pool
+[] Hands on Buffer and Stream
 
 ## Event queue/broker
 [] RannitMQ

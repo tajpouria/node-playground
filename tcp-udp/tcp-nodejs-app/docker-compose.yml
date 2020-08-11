@@ -1,0 +1,15 @@
+version: "3"
+services:
+  server:
+    image: tajpouria/node-tcp-server
+    environment:
+      - "PORT=7070"
+      - "HOST=127.0.0.1"
+  nginx:
+    image: "nginx:alpine"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "./nginx:/etc/nginx"
+    links:
+      - "server"
