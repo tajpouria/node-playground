@@ -4,7 +4,8 @@
 [x] What is SSL/TLS and how SSL certificate works?
 [] What is HTTP2 and why use it?
 [x] Hands-on SSH
-[] What is Telnet?
+[] Telnet?
+[] Netcat?
 [x] layer 4 vs layer 7 proxy?
 [] SNI
 
