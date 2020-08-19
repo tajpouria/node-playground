@@ -99,7 +99,7 @@ http { # Http context
 
 You can also provide mime type manually using `types` context:
 
-```
+```txt
 events {}
 
 http {
@@ -117,3 +117,52 @@ http {
 }
 
 ```
+
+## Location context
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+                server_name 127.17.0.2;
+
+                root /sites/demo;
+
+                # Exact match (location should be exactly 'greet' to match)
+                location = /greet {
+                        return 200 'Exact match'
+                }
+
+                # Preferential prefix match(If location start with 'greet2' it match)
+                location ^~ /greet2 {
+                        return 200 'Preferential prefix match'
+                }
+
+                # Regex match - case *sensitive*(location should follow Greet[0-9] pattern)
+                location ~ /Greet[0-9] {
+                        return 200 'Regex match - case sensitive'
+                }
+
+                # Regex match - case *insensitive*(location should follow Greet[0-9] pattern)
+                location ~* /Greet[0-9] {
+                        return 200 'Regex match - case insensitive'
+                }
+
+                # Prefix match(If location start with 'greet' it match)
+                location /greet {
+                        return 200 'Prefix match'
+                }
+        }
+}
+```
+
+Nginx matching priority:
+
+1. Exact match `location = path`
+2. Preferential prefix `location ^~ path`
+3. Regex `location ~ path` or `location ~ path`
+4. Prefix match `location path`
