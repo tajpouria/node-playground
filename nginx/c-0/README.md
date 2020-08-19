@@ -34,3 +34,40 @@ For instance in this case PCRE package that uses to determine regex expression i
 
 > nginx
 > ps aux | grep nginx
+
+## Sending signals
+
+> nginx -s stop
+
+## Adding ngnix Service
+
+1. [Add nginx sevice script](https://www.nginx.com/resources/wiki/start/topics/examples/systemd/)
+
+Save this file as `/lib/systemd/system/nginx.service`
+
+```txt
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/bin/nginx
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Changed PIDFile and ExecStart prperty to match configure options
+
+2. Start using systmd `systemctl start nginx`
+
+3. Check status `systemctl stauts nginx`
+
+4. Running on boot: `systemctl enable nginx`
