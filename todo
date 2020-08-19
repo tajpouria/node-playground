@@ -8,6 +8,7 @@
 [] Netcat?
 [x] layer 4 vs layer 7 proxy?
 [] SNI
+[] CDN && Cloud flare
 
 ## SDLC
 [] GRPC
