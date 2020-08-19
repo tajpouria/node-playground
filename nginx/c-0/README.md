@@ -1,7 +1,3 @@
-## Running on
-
-> docker run -t -d ubuntu /bin/sh
-
 ## Building NGINX from source & Adding modules
 
 1. Download Nginx source from [nginx.org donwload page](http://nginx.org/en/download.html): `wget http://nginx.org/download/nginx-1.19.2.tar.gz`
@@ -39,6 +35,10 @@ For instance in this case PCRE package that uses to determine regex expression i
 
 > nginx -s stop
 
+## Check nginx.conf sytanx
+
+> nginx -t
+
 ## Adding ngnix Service
 
 1. [Add nginx sevice script](https://www.nginx.com/resources/wiki/start/topics/examples/systemd/)
@@ -71,3 +71,49 @@ Changed PIDFile and ExecStart prperty to match configure options
 3. Check status `systemctl stauts nginx`
 
 4. Running on boot: `systemctl enable nginx`
+
+Difference between `systemctl restart nginx` and `systemctl reload nginx`:
+
+`reload`:
+`restart`: Completely stop and then start nginx
+
+## Creating virtual host
+
+/etc/nignx/nginx.conf
+
+```txt
+events {} # Should specified in order to configure be valid
+
+http { # Http context
+        include mime.types; # Make http virtual host to response to send file with appropriate mime type (content-type) by default nginx set `content-type: text/htm` to all requests
+                            # Consider mime.types is a file in the same directory ngingx.conf(/etc/nginx/nginx.conf) and path is relative to nginx.conf file `./mime.types`
+        server { # Create virtual host
+                listen 80;
+                server_name 127.17.0.2;
+
+                root /sites/demo; # Virtual host should serve content relative to this path e.g. If user request /index.html request should serve from /sites/demo/index.html
+        }
+}
+
+```
+
+You can also provide mime type manually using `types` context:
+
+```
+events {}
+
+http {
+        types {
+                text/html html; # Use content-type: text/html for file file html extension
+                text/css css;
+        }
+
+        server {
+                listen 80;
+                server_name 127.17.0.2;
+
+                root /sites/demo;
+        }
+}
+
+```
