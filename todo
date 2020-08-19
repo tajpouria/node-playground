@@ -20,18 +20,18 @@
 [x] Node HTTPS
 [x] Node HTTP
 [] Node clustering
-[] Node Repl
+[x] Node Repl
 [] Map 2 array intersect
 [] JS event pool
 [] Hands on Buffer and Stream
-[] Firebase android IOS notification API
-[] Database Connection pool
+[x] Firebase android IOS notification API
+[x] Database Connection pool
 
 ## Event queue/broker
-[] RannitMQ
-[] RabbitMQ exchange
+[] RabbitMQ and RabbitMQ exchange
+[] 
 
 ## Database
-[] MongoDB  JSONSchema
+[] MongoDB JSONSchema
 [] MongoDB write concerns 
 
