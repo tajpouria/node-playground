@@ -132,27 +132,27 @@ http {
 
                 root /sites/demo;
 
-                # Exact match (location should be exactly 'greet' to match)
+                # Exact match (uri should be exactly 'greet' to match)
                 location = /greet {
                         return 200 'Exact match'
                 }
 
-                # Preferential prefix match(If location start with 'greet2' it match)
+                # Preferential prefix match(If uri start with 'greet2' it match)
                 location ^~ /greet2 {
                         return 200 'Preferential prefix match'
                 }
 
-                # Regex match - case *sensitive*(location should follow Greet[0-9] pattern)
+                # Regex match - case *sensitive*(uri should follow Greet[0-9] pattern)
                 location ~ /Greet[0-9] {
                         return 200 'Regex match - case sensitive'
                 }
 
-                # Regex match - case *insensitive*(location should follow Greet[0-9] pattern)
+                # Regex match - case *insensitive*(uri should follow Greet[0-9] pattern)
                 location ~* /Greet[0-9] {
                         return 200 'Regex match - case insensitive'
                 }
 
-                # Prefix match(If location start with 'greet' it match)
+                # Prefix match(If uri start with 'greet' it match)
                 location /greet {
                         return 200 'Prefix match'
                 }
@@ -162,7 +162,100 @@ http {
 
 Nginx matching priority:
 
-1. Exact match `location = path`
-2. Preferential prefix `location ^~ path`
-3. Regex `location ~ path` or `location ~ path`
-4. Prefix match `location path`
+1. Exact match `location = uri`
+2. Preferential prefix `location ^~ uri`
+3. Regex `location ~ path` or `location ~ uri`
+4. Prefix match `location uri`
+
+## Conditions and Variables
+
+basic condition:
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+                server_name 127.17.0.2;
+
+                root /sites/demo;
+
+                if($arg_apikey != 123){ # Built-in variable mention below
+                        return 401 "invalid api key"
+                }
+        }
+}
+
+```
+
+**Using conditions inside the location context is highly discouraged**
+
+There is two kind of variables are available for nginx configuration:
+
+1. [Built-in variables](http://nginx.org/en/docs/varindex.html)
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+                server_name 127.17.0.2;
+
+                root /sites/demo;
+
+                location = /inspect {
+                        return 200 "$host \n $uri \n $args \n $arg_foo"; # Using double quate you cand embed variables directly to response
+                }
+        }
+}
+
+```
+
+```sh
+➜  ~ curl http://172.17.0.2/inspect\?foo\=iamfoo\&bar\=iambar
+172.17.0.2
+ /inspect
+ foo=iamfoo&bar=iambar
+ iamfoo
+
+```
+
+2. Manual variable
+
+```txt
+events {}
+  
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+                server_name 127.17.0.2;
+
+                root /sites/demo;
+
+                set $weekend 'No';
+
+                if ( $date_local ~ 'Saturday|Sunday' ){
+                        set $weekend 'Yes';
+                }
+
+                location = /is_weekend{
+                        return 200 $weekend;
+                }
+        }
+}
+
+```
+
+```sh
+➜ curl http://172.17.0.2/is_weekend                       
+No
+
+```
