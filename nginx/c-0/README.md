@@ -507,3 +507,45 @@ http {
 }
 
 ```
+
+## Worker processes
+
+**Master process** is the Nginx that we started
+Then Master process will spawn **worker process** to handle client requests
+The default number of worker process is `one`
+
+**It is the good practice to set `worker_processes` number equal to cpu core number** for example in a 8 core cpu set it to 8, That's mean one worker_process for each CPU core. You can handle it automaticlly using `worker_processes auto` directive
+
+Get CPU info:
+
+> lscpu
+
+`worker_connection` is the limitation number of connection each cpu core should accept. **Set it to: `ulimit -n`**. Example image machine with ulimit -n 1024 -> `worker_connection 2048;`
+
+There for the number of request our webserver can handle at the same time is equal to `worker_processes * worker_connection`
+
+Get the limit how many file each CPU core can open:
+
+> ulimit -n
+
+```txt
+user www-data # Process owner
+pid /var/run/nginx.pid # Configure the process id location 
+
+worker_processes auto; # Number of worker_processes
+
+events {
+  worker_connection 1024 # Number of connection each worker process should handle
+}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+        }
+}
+
+```
