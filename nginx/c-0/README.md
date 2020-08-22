@@ -230,7 +230,7 @@ http {
 
 ```txt
 events {}
-  
+
 http {
         include mime.types;
 
@@ -255,7 +255,104 @@ http {
 ```
 
 ```sh
-➜ curl http://172.17.0.2/is_weekend                       
+➜ curl http://172.17.0.2/is_weekend
 No
+
+```
+
+## Redirect and Rewrite
+
+- Redirect:
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                return 307 /greet; # Redirect all requests to /greet
+
+        }
+}
+```
+
+- Rewrite:
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                rewrite ^user/\w+ /greet;
+
+                location /greet {
+                        return 'hello $request_uri'
+                }
+        }
+}
+```
+
+- Rewrite Capture groups: Wrap capture group in parentheses then you can access them using $1, $2, ...;
+  For example in following case all request to /user/foo/bar will rewritten to /greet/foo/bar:
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                rewrite ^/user/(\w+)/(\w+) /greet/$1/$2;
+
+                location = /greet/foo/bar {
+                        return 200 'hello foo bar';
+                }
+        }
+}
+
+```
+
+- Rewrite **last flag**: Specify last rewrite directive that should be evaluated:
+  For example in following case if there wasn't a `last` flag here is what happening:
+
+1. Request to /user/foo/bar rewritten to /greet/foo/bar
+2. On second line it will rewritten to /thumb.png and therefore it never hit /greet/foo/bar
+
+But since we added `last` flag on firs rewrite directive second rewrite never hit
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                rewrite ^/user/(\w+)/(\w+) /greet/$1/$2 last;
+                rewrite /greet/foo/bar /thumb.png;
+
+                location = /greet/foo/bar {
+                        return 200 'hello foo bar';
+                }
+        }
+}
 
 ```
