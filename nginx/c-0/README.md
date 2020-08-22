@@ -356,3 +356,57 @@ http {
 }
 
 ```
+
+## Try files
+
+In following example request handle like so:
+
+1. first check if `/sites/demo/$uri` exists
+2. If not check if `/sites/demo/greet` exists
+3. If not it will handle with `/friendly_404` location context
+
+Consider in `try_files` **all** file except the **last one** _in this case /friendly404_ one will check relative to root.
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                try_files $uri /greet /friendly_404;
+
+                location = /friendly_404 {
+                        return 404 "Sorry Not found!";
+                }
+        }
+}
+
+```
+
+## Named location
+
+```txt
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                try_files $uri /greet @friendly_404; # Make sure to no re evaluation happening on friendly_404 and request hit it directly
+
+                location  @friendly_404 {
+                        return 404 "Sorry Not found!";
+                }
+        }
+}
+
+```
