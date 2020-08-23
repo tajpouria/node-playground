@@ -514,7 +514,7 @@ http {
 Then Master process will spawn **worker process** to handle client requests
 The default number of worker process is `one`
 
-**It is the good practice to set `worker_processes` number equal to cpu core number** for example in a 8 core cpu set it to 8, That's mean one worker_process for each CPU core. You can handle it automaticlly using `worker_processes auto` directive
+**It is the good practice to set `worker_processes` number equal to cpu core number** for example in a 8 core cpu set it to 8, That's mean one `worker_process` for each CPU core. You can handle it automaticlly using `worker_processes auto` directive
 
 Get CPU info:
 
@@ -530,7 +530,7 @@ Get the limit how many file each CPU core can open:
 
 ```txt
 user www-data # Process owner
-pid /var/run/nginx.pid # Configure the process id location 
+pid /var/run/nginx.pid # Configure the process id location
 
 worker_processes auto; # Number of worker_processes
 
@@ -545,6 +545,119 @@ http {
                 listen 80;
 
                 root /sites/demo;
+        }
+}
+
+```
+
+## Buffer and timeouts
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+
+  include mime.types;
+
+  # Buffer size for POST submissions
+  client_body_buffer_size 10K;
+  client_max_body_size 8m;
+
+  # Buffer size for Headers
+  client_header_buffer_size 1k;
+
+  # Max time to receive client headers/body
+  client_body_timeout 12;
+  client_header_timeout 12;
+
+  # Max time to keep a connection open for
+  keepalive_timeout 15;
+
+  # Max time for the client accept/receive a response
+  send_timeout 10;
+
+  # Skip buffering for static files directly send from hard and not read into memory
+  sendfile on;
+
+  # Optimise sendfile packets
+  tcp_nopush on;
+
+  server {
+
+    listen 80;
+    server_name 167.99.93.26;
+
+    root /sites/demo;
+  }
+}
+
+```
+
+## Adding dynamic module
+
+**Dynamic modules** being modules we can load **selectively** from Nginx configuration, unlike static modules which is always loaded
+
+In order to add modules to Nginx we have to rebuild Nginx from source. Following is the to add an image filter module:
+
+1. Find the dynamic module from help:
+
+> ./configure --help | grep dynamic
+
+```sh
+  --with-http_xslt_module=dynamic    enable dynamic ngx_http_xslt_module
+  --with-http_image_filter_module=dynamic # We want ot add this module
+                                     enable dynamic ngx_http_image_filter_module
+  --with-http_geoip_module=dynamic   enable dynamic ngx_http_geoip_module
+  --with-http_perl_module=dynamic    enable dynamic ngx_http_perl_module
+  --with-mail=dynamic                enable dynamic POP3/IMAP4/SMTP proxy module
+  --with-stream=dynamic              enable dynamic TCP/UDP proxy module
+  --with-stream_geoip_module=dynamic enable dynamic ngx_stream_geoip_module
+  --add-dynamic-module=PATH          enable dynamic external module
+  --with-compat                      dynamic modules compatibility
+
+```
+
+2. Rebuild Nginx with that module and **setup module directory configuration in order to be able easily include that module inside nginx.conf**
+
+> ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules
+
+It will throw following error since it need GD library _Linux image processing lib_:
+
+```sh
+./configure: error: the HTTP image filter module requires the GD library.
+You can either do not enable the module or install the libraries.
+```
+
+Run `apt-get install libgd-dev` and rebuild image
+
+3. make && make install
+
+4. Check the new configuration to see if newly module and module path is set. By running `Nginx -V`
+
+5. **Load** and use it:
+
+```txt
+load_module /etc/nginx/modules/ngx_http_image_filter_module.so; # Load the dynamic module
+
+events {}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                location =/thumb.png {
+                        image_filter rotate 180; # Rotate the image 180 deg
+                }
         }
 }
 
