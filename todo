@@ -19,12 +19,12 @@
 ## Node
 [x] Node HTTPS
 [x] Node HTTP
-[] Node clustering
+[] Node Cluster module
 [x] Node Repl
 [] Map 2 array intersect
 [] JS event pool
 [X] Hands on Buffer and Stream
-[] Child processes https://jscomplete.com/learn/node-beyond-basics/child-processes
+[X] Child processes https://jscomplete.com/learn/node-beyond-basics/child-processes
 [x] Firebase android IOS notification API
 [x] Database Connection pool
 
