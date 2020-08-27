@@ -41,7 +41,7 @@ For instance in this case PCRE package that uses to determine regex expression i
 
 ## Adding ngnix Service
 
-1. [Add nginx sevice script](https://www.nginx.com/resources/wiki/start/topics/examples/systemd/)
+1. [Add nginx service script](https://www.nginx.com/resources/wiki/start/topics/examples/systemd/)
 
 Save this file as `/lib/systemd/system/nginx.service`
 
@@ -74,24 +74,22 @@ Changed PIDFile and ExecStart prperty to match configure options
 
 Difference between `systemctl restart nginx` and `systemctl reload nginx`:
 
-`reload`:
+`reload`: Check if there's not syntax error then reload
 `restart`: Completely stop and then start nginx
 
-## Creating virtual host
-
-/etc/nignx/nginx.conf
+## Creating server
 
 ```txt
 events {} # Should specified in order to configure be valid
 
 http { # Http context
-        include mime.types; # Make http virtual host to response to send file with appropriate mime type (content-type) by default nginx set `content-type: text/htm` to all requests
-                            # Consider mime.types is a file in the same directory ngingx.conf(/etc/nginx/nginx.conf) and path is relative to nginx.conf file `./mime.types`
-        server { # Create virtual host
+        include mime.types; # Make http server to response to send file with appropriate mime type (content-type) by default nginx set `content-type: text/html` to all requests
+                            # Consider mime.types is a file in the same directory nginx.conf(/etc/nginx/nginx.conf) and path is relative to nginx.conf file `./mime.types`
+        server { # Create server
                 listen 80;
                 server_name 127.17.0.2;
 
-                root /sites/demo; # Virtual host should serve content relative to this path e.g. If user request /index.html request should serve from /sites/demo/index.html
+                root /sites/demo; #  server should serve content relative to this path e.g. If user request /index.html request should serve from /sites/demo/index.html
         }
 }
 
@@ -193,7 +191,7 @@ http {
 
 **Using conditions inside the location context is highly discouraged**
 
-There is two kind of variables are available for nginx configuration:
+There is two kind of variables available for nginx configuration:
 
 1. [Built-in variables](http://nginx.org/en/docs/varindex.html)
 
@@ -210,7 +208,7 @@ http {
                 root /sites/demo;
 
                 location = /inspect {
-                        return 200 "$host \n $uri \n $args \n $arg_foo"; # Using double quate you cand embed variables directly to response
+                        return 200 "$host \n $uri \n $args \n $arg_foo"; # Using double quat you can embed variables directly to response
                 }
         }
 }
@@ -276,9 +274,9 @@ http {
                 root /sites/demo;
 
                 return 307 /greet; # Redirect all requests to /greet
-
         }
 }
+
 ```
 
 - Rewrite:
@@ -301,6 +299,7 @@ http {
                 }
         }
 }
+
 ```
 
 - Rewrite Capture groups: Wrap capture group in parentheses then you can access them using $1, $2, ...;
@@ -365,7 +364,7 @@ In following example request handle like so:
 2. If not check if `/sites/demo/greet` exists
 3. If not it will handle with `/friendly_404` location context
 
-Consider in `try_files` **all** file except the **last one** _in this case /friendly404_ one will check relative to root.
+Consider in `try_files` **all** file except the **last one** _in this case /friendly404_ will check relative to root:
 
 ```txt
 events {}
@@ -512,15 +511,15 @@ http {
 
 **Master process** is the Nginx that we started
 Then Master process will spawn **worker process** to handle client requests
-The default number of worker process is `one`
+The default number of worker process is `1`
 
-**It is the good practice to set `worker_processes` number equal to cpu core number** for example in a 8 core cpu set it to 8, That's mean one `worker_process` for each CPU core. You can handle it automaticlly using `worker_processes auto` directive
+**It is the good practice to set `worker_processes` number equal to cpu core number** for example in a 8 core cpu set it to 8, That's mean one `worker_process` for each CPU core. You can handle it automatically using `worker_processes auto` directive
 
 Get CPU info:
 
 > lscpu
 
-`worker_connection` is the limitation number of connection each cpu core should accept. **Set it to: `ulimit -n`**. Example image machine with ulimit -n 1024 -> `worker_connection 2048;`
+`worker_connection` is the limitation number of connection each cpu core should accept. **Set it to: `ulimit -n`**. Example image machine with ulimit -n 1024 -> `worker_connection 1024;`
 
 There for the number of request our webserver can handle at the same time is equal to `worker_processes * worker_connection`
 
@@ -535,7 +534,7 @@ pid /var/run/nginx.pid # Configure the process id location
 worker_processes auto; # Number of worker_processes
 
 events {
-  worker_connection 1024 # Number of connection each worker process should handle
+  worker_connection 1024; # Number of connection each worker process should handle
 }
 
 http {
@@ -603,7 +602,7 @@ http {
 
 **Dynamic modules** being modules we can load **selectively** from Nginx configuration, unlike static modules which is always loaded
 
-In order to add modules to Nginx we have to rebuild Nginx from source. Following is the to add an image filter module:
+In order to add dynamic modules to Nginx we have to rebuild Nginx from source. Following is the to add an image filter module:
 
 1. Find the dynamic module from help:
 
@@ -632,6 +631,7 @@ It will throw following error since it need GD library _Linux image processing l
 ```sh
 ./configure: error: the HTTP image filter module requires the GD library.
 You can either do not enable the module or install the libraries.
+
 ```
 
 Run `apt-get install libgd-dev` and rebuild image
@@ -660,5 +660,97 @@ http {
                 }
         }
 }
+
+```
+
+## Header and expires
+
+add_header:
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                location =/thumb.png {
+                        add_header X-My-Header "My-Custom-Header";
+                        return 200 /thumb.png;
+                }
+        }
+}
+
+```
+
+```sh
+➜ curl -I http://172.17.0.2/thumb.png
+HTTP/1.1 200 OK
+Server: nginx/1.19.2
+Date: Thu, 27 Aug 2020 06:22:03 GMT
+Content-Type: image/png
+Content-Length: 10
+Connection: keep-alive
+X-My-Header: My-Custom-Header
+
+```
+
+Expire header:
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+
+                location ~* \.(css|js|jpg|png)$ {
+                        access_log off;
+                        add_header Cache-Control public;
+                        add_header Pragma public;
+                        add_header Vary; Accept_encoding
+                        expires 1M; # Nginx convenient way saying `add_header expires 'Fri, 15 Jun 2020 08:22:00 GMT';`
+                }
+        }
+}
+
+```
+
+```sh
+➜ curl -I http://172.17.0.2/thumb.png
+HTTP/1.1 200 OK
+Server: nginx/1.19.2
+Date: Thu, 27 Aug 2020 06:37:11 GMT
+Content-Type: image/png
+Content-Length: 12627
+Last-Modified: Wed, 11 Apr 2018 20:31:37 GMT
+Connection: keep-alive
+ETag: "5ace70a9-3153"
+Expires: Sat, 26 Sep 2020 06:37:11 GMT
+Cache-Control: max-age=2592000
+Cache-Control: public
+Pragma: public
+Vary: Accept_encoding
+Accept-Ranges: bytes
 
 ```

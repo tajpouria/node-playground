@@ -19,9 +19,9 @@
 ## Node
 [x] Node HTTPS
 [x] Node HTTP
+[] Node HTTP2
 [] Node Cluster module
 [x] Node Repl
-[] Map 2 array intersect
 [] JS event pool
 [X] Hands on Buffer and Stream
 [X] Child processes https://jscomplete.com/learn/node-beyond-basics/child-processes
