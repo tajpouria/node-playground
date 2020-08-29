@@ -27,7 +27,8 @@
 [X] Child processes https://jscomplete.com/learn/node-beyond-basics/child-processes
 [x] Firebase android IOS notification API
 [x] Database Connection pool
-[] Bitwise operators 
+[x] Bitwise operators 
+
 ## Event queue/broker
 [] RabbitMQ and RabbitMQ exchange
 
