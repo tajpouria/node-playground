@@ -728,7 +728,7 @@ http {
                         access_log off;
                         add_header Cache-Control public;
                         add_header Pragma public;
-                        add_header Vary; Accept_encoding
+                        add_header Vary Accept_encoding;
                         expires 1M; # Nginx convenient way saying `add_header expires 'Fri, 15 Jun 2020 08:22:00 GMT';`
                 }
         }
