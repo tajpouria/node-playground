@@ -9,10 +9,8 @@
 ./configure: error: the HTTP rewrite module requires the PCRE library.
 ```
 
-For instance in this case PCRE package that uses to determine regex expression is missed
-
-5. Install Missed packages
-   Ubuntu: `apt-get install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev`
+For instance in this case PCRE package that uses to determine regex expression is missed 5. Install Missed packages
+Ubuntu: `apt-get install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev`
 
 6. Run ./configure again this time around you should not get error and source should be ready to compile
 7. Configure Nginx with [Building nginx from sources custom configuration](http://nginx.org/en/docs/configure.html):
@@ -756,3 +754,187 @@ Vary: Accept_encoding
 Accept-Ranges: bytes
 
 ```
+
+### Gzip
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        gzip on;
+        gzip_comp_level 3;
+        gzip_types text/css text/javascript;
+
+        server {
+                listen 80;
+
+                root /sites/demo;
+        }
+}
+
+```
+
+```sh
+➜ curl -I -H"Accept-Encoding: gzip" http://172.17.0.2/style.css # Client should specify that want gzip content
+HTTP/1.1 200 OK
+Server: nginx/1.19.2
+Date: Sun, 30 Aug 2020 15:19:41 GMT
+Content-Type: text/css
+Last-Modified: Thu, 12 Apr 2018 19:12:50 GMT
+Connection: keep-alive
+ETag: W/"5acfafb2-3d4"
+Content-Encoding: gzip # Gzip encoded
+
+```
+
+## Fast CGI cache
+
+Example setting up fast_cgi with php_fpm:
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+
+  include mime.types;
+
+  # Configure microcache (fastcgi)
+  fastcgi_cache_path /tmp/nginx_cache levels=1:2 keys_zone=ZONE_1:100m inactive=60m;
+  fastcgi_cache_key "$scheme$request_method$host$request_uri";
+  add_header X-Cache $upstream_cache_status;
+
+  server {
+
+    listen 80;
+    server_name 167.99.93.26;
+
+    root /sites/demo;
+
+    index index.php index.html;
+
+    # Cache by default
+    set $no_cache 0;
+
+    # Check for cache bypass
+    if ($arg_skipcache = 1) {
+      set $no_cache 1;
+    }
+
+    location / {
+      try_files $uri $uri/ =404;
+    }
+
+    location ~\.php$ {
+      # Pass php requests to the php-fpm service (fastcgi)
+      include fastcgi.conf;
+      fastcgi_pass unix:/run/php/php7.1-fpm.sock;
+
+      # Enable cache
+      fastcgi_cache ZONE_1;
+      fastcgi_cache_valid 200 60m;
+      fastcgi_cache_bypass $no_cache;
+      fastcgi_no_cache $no_cache;
+    }
+  }
+}
+
+```
+
+Apache bench mark:
+
+> sudo apt-get install apache2-utils
+
+e.g. Sending 100 request with 10 concurrent request each time
+
+> ab -n 100 -c 10 http://167.99.93.26/file.php
+
+## Enable HTTP2
+
+1. Install http_v2 module
+
+   > ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules --with-http_v2_module
+   > make
+   > make install
+
+2. Generate SSl certificate and certificate key
+
+> openssl req -x509 -days 10 -nodes -newkey rsa:2048 -keyout /etc/nginx/ssl/self.key -out /etc/nginx/ssl/self.crt
+
+3. Configure and reload nginx
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        server {
+                listen 443 ssl http2;
+                server_name 172.17.0.2;
+
+                root /sites/demo;
+
+                ssl_certificate /etc/nginx/ssl/self.crt;
+                ssl_certificate_key /etc/nginx/ssl/self.key;
+        }
+}
+
+```
+
+## HTTP web push
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        server {
+                listen 443 ssl http2;
+                server_name 172.17.0.2;
+
+                root /sites/demo;
+
+                ssl_certificate /etc/nginx/ssl/self.crt;
+                ssl_certificate_key /etc/nginx/ssl/self.key;
+
+                location = index.html {
+                        # Web Following resources along with index.html
+                        htt2_push /style.css;
+                        htt2_push /thumb.png;
+                }
+        }
+}
+
+```
+
+Test with nghttp2:
+
+> sudo apt-get install nghttp2-client
+> nghttp -nys https://172.17.0.2/index.html
