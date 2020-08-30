@@ -707,6 +707,8 @@ X-My-Header: My-Custom-Header
 
 Expire header:
 
+[MDN HTTP caching introduction](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching)
+
 ```txt
 user www-data;
 
