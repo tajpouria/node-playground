@@ -27,6 +27,7 @@ Ubuntu: `apt-get install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev`
 11. Run nginx service and check it:
 
 > nginx
+
 > ps aux | grep nginx
 
 ## Sending signals
@@ -36,6 +37,16 @@ Ubuntu: `apt-get install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev`
 ## Check nginx.conf sytanx
 
 > nginx -t
+
+## Run nginx on a specific prefix and a specific configuration [example](../open-resty-intro)
+
+> mkdir my-project && cd my-project
+
+> mkdir logs
+
+> touch develop.conf
+
+> nginx -p . -c ~/.pro/fun/node-playground/nginx/my-project/develop.conf
 
 ## Adding ngnix Service
 
