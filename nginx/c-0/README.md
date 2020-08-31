@@ -892,6 +892,7 @@ http {
                 listen 443 ssl http2;
                 server_name 172.17.0.2;
 
+
                 root /sites/demo;
 
                 ssl_certificate /etc/nginx/ssl/self.crt;
