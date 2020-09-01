@@ -877,9 +877,9 @@ e.g. Sending 100 request with 10 concurrent request each time
 
 1. Install http_v2 module
 
-   > ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules --with-http_v2_module
-   > make
-   > make install
+      > ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules --with-http_v2_module
+      > make
+      > make install
 
 2. Generate SSl certificate and certificate key
 
@@ -950,3 +950,92 @@ Test with nghttp2:
 
 > sudo apt-get install nghttp2-client
 > nghttp -nys https://172.17.0.2/index.html
+
+## Redirect all HTTP request to HTTPS
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        # Redirect all trafic to HTTPS
+        server {
+                listen 80;
+                server_name 172.17.0.2;
+                return 301 https://$host$request_uri;
+        }
+
+        server {
+                listen 443 ssl http2;
+                server_name 172.17.0.2;
+
+                root /sites/demo;
+
+                ssl_certificate /etc/nginx/ssl/self.crt;
+                ssl_certificate_key /etc/nginx/ssl/self.key;
+        }
+}
+
+```
+
+## [How to properly configure your nginx for TLS](https://medium.com/@mvuksano/how-to-properly-configure-your-nginx-for-tls-564651438fe0)
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        include mime.types;
+
+        server {
+                listen 443 ssl http2;
+                server_name 172.17.0.2;
+
+                # Disable SSL
+                ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+
+                # Optimise cipher suites
+                # Nginx to tell clients that we have a preferred list of ciphers that we want to use
+                ssl_prefer_server_ciphers on;
+                # Setup which cipher suites should and which should not be used
+                ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5;
+
+                # Enable Deffie Hellman(DH) key exchange param
+                ssl_dhparam /etc/nginx/ssl/dhparam.pem; # dhparam key should generated using command provided after this code snippet
+
+                # Enable HSTS When a (complying) browser receives HSTS header it will not try to contact the server using HTTP for a specified period of time
+                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always; # max-age in second
+
+                # Optimise SSL session cache
+                ssl_session_cache   shared:SSL:40m; # Cache on memory:Name of the cache:size of the cache
+                ssl_session_timeout 4h;
+
+                # Enable session tickets
+                ssl_session_tickets on;
+
+                root /sites/demo;
+
+                ssl_certificate /etc/nginx/ssl/self.crt;
+                ssl_certificate_key /etc/nginx/ssl/self.key;
+        }
+}
+
+```
+
+Generate DH Param key:
+
+Make sure to specify dhparam size (2048) equal to TLS certificate key _/etc/nginx/ssl/self.key_
+
+> openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048
