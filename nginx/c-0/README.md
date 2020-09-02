@@ -1164,3 +1164,17 @@ It will show all modules that will be added by default, Example of excluding `ht
 
 > make install
 
+## Renew let's encrypt certificate
+
+At the time writing this let's encrypt SSL certificate is only valid for 90 days following is a convenient way to renew certificate using cron-tab:
+
+> apt-get install cron
+
+> cron-tab -e
+
+Then add this to end of the configuration:
+
+```txt
+@daily certbot renew
+
+```
