@@ -20,6 +20,7 @@ Ubuntu: `apt-get install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev`
 8. make and make install _compile and install_:
 
 > make
+
 > make install
 
 9. Check if exists `ls -l /etc/nginx`
@@ -949,6 +950,7 @@ http {
 Test with nghttp2:
 
 > sudo apt-get install nghttp2-client
+
 > nghttp -nys https://172.17.0.2/index.html
 
 ## Redirect all HTTP request to HTTPS
@@ -1120,3 +1122,45 @@ server {
 ```
 
 Suppose, as before, that the 20‑slot queue is empty and 21 requests arrive simultaneously from a given IP address. NGINX forwards all 21 requests immediately _since nodelay are set_ and marks the 20 slots in the queue as taken, then frees 1 slot every 100 milliseconds. (If there were 25 requests instead, NGINX would immediately forward 21 of them, mark 20 slots as taken, and reject 4 requests with status 503.)
+
+## Basic auth
+
+Generate user's password:
+
+> apt-get install apache2-utils
+> htpasswd -c /etc/nginx/.htpasswd foo
+
+```txt
+location /api {
+    auth_basic           “Administrator’s Area”;
+    auth_basic_user_file /etc/nginx/.htpasswd;
+}
+
+```
+
+## Hardening NGINX
+
+```txt
+http {
+  server_tokens off; # Remove NGINX version from server response header
+
+  server {
+    add_header X-Frame-Options "SAMEORIGIN"; # Deny cross-origin framing Simply means forbid other origins to serve your content in `iframe`
+    add_header X-XSS-Protection "1; mode=block";  # Telling the browser if it detect cross site scripting attach block loading the page
+  }
+}
+
+```
+
+Reconfigure the source code `without` not necessary modules:
+
+> ./configure --help | grep without
+
+It will show all modules that will be added by default, Example of excluding `http_auto_index_module`:
+
+> ./configure --without-http_auto_index_module
+
+> make
+
+> make install
+
