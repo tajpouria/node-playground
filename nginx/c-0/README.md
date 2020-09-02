@@ -877,9 +877,9 @@ e.g. Sending 100 request with 10 concurrent request each time
 
 1. Install http_v2 module
 
-      > ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules --with-http_v2_module
-      > make
-      > make install
+   > ./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-pcre --pid-path=/var/run/nginx.pid --with-http_ssl_module --with-http_image_filter_module=dynamic --modules-path=/etc/nginx/modules --with-http_v2_module
+   > make
+   > make install
 
 2. Generate SSl certificate and certificate key
 
@@ -1039,3 +1039,84 @@ Generate DH Param key:
 Make sure to specify dhparam size (2048) equal to TLS certificate key _/etc/nginx/ssl/self.key_
 
 > openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048
+
+## [Rate limitation](https://www.nginx.com/blog/rate-limiting-nginx/#:~:text=Rate%20%E2%80%93%20Sets%20the%20maximum%20request,1%20request%20every%20100%20milliseconds.)
+
+Install [ Siege ](https://www.joedog.org/siege-manual/)
+
+> apt-get install siege
+
+Rate limiting is configured with two main directives, `limit_req_zone` and `limit_req`:
+
+```txt
+limit_req_zone $binary_remote_addr zone=mylimit:10m rate=10r/s;
+# args:
+# Key: Limiting Against request character,
+# Zone: Define the shared memory zone (In this case in order to store binary representation of IP addresses)
+# Rate : Set the maximum request rate NGINX track on ms so in this example 1 request every 100 ms
+
+server {
+    location /login/ {
+        limit_req zone=mylimit;
+
+        proxy_pass http://my_upstream;
+    }
+}
+
+```
+
+With current rate limit implementation _10r/s_ One IP address can make request up to 10 request every second in other word 100 request every milliseconds so performing following test:
+
+> siege -v -r 2 -c 5 https://172.17.0.2/thumb.png # Create five cuncurrent connection and apply 2 test for each connection
+
+Result so:
+
+```sh
+HTTP/1.1 200     0.00 secs:   12627 bytes ==> GET  /thumb.png # Just first one resolved with 200
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+HTTP/1.1 503     0.00 secs:     197 bytes ==> GET  /thumb.png
+
+```
+
+Handling burst _Buffer some requests in queue and response with delay_:
+
+```txt
+limit_req_zone $binary_remote_addr zone=mylimit:10m rate=10r/s;
+
+server {
+    location /login/ {
+        limit_req zone=mylimit burst=20; # Buffering up to 20 request
+
+        proxy_pass http://my_upstream;
+    }
+}
+
+```
+
+That means if 21 requests arrive from a given IP address simultaneously, NGINX forwards the first one to the upstream server group immediately and puts the remaining 20 in the queue. It then forwards a queued request every 100 milliseconds, and returns 503 to the client only if an incoming request makes the number of queued requests go over 20.
+
+**For most deployments, we recommend including the burst and nodelay parameters to the limit_req directive.**
+
+Queueing with No Delay:
+
+```txt
+limit_req_zone $binary_remote_addr zone=mylimit:10m rate=10r/s;
+
+server {
+    location /login/ {
+        limit_req zone=mylimit burst=20 nodelay; # No delay buffering
+
+        proxy_pass http://my_upstream;
+    }
+}
+
+```
+
+Suppose, as before, that the 20‑slot queue is empty and 21 requests arrive simultaneously from a given IP address. NGINX forwards all 21 requests immediately _since nodelay are set_ and marks the 20 slots in the queue as taken, then frees 1 slot every 100 milliseconds. (If there were 25 requests instead, NGINX would immediately forward 21 of them, mark 20 slots as taken, and reject 4 requests with status 503.)
