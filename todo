@@ -28,6 +28,7 @@
 [x] Firebase android IOS notification API
 [x] Database Connection pool
 [x] Bitwise operators 
+[] Working_threads vs child_process vs cluster
 
 ## Event queue/broker
 [] RabbitMQ and RabbitMQ exchange
