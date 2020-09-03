@@ -28,7 +28,7 @@
 [x] Firebase android IOS notification API
 [x] Database Connection pool
 [x] Bitwise operators 
-[] Working_threads vs child_process vs cluster
+[x] Working_threads vs child_process vs cluster
 [] PM2
 
 ## Event queue/broker
