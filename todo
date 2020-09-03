@@ -29,6 +29,7 @@
 [x] Database Connection pool
 [x] Bitwise operators 
 [] Working_threads vs child_process vs cluster
+[] PM2
 
 ## Event queue/broker
 [] RabbitMQ and RabbitMQ exchange
