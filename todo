@@ -4,8 +4,8 @@
 [x] What is SSL/TLS and how SSL certificate works?
 [] What is HTTP2 and why use it?
 [x] Hands-on SSH
-[] Telnet?
-[] Netcat?
+[] Telnet
+[] nc
 [x] layer 4 vs layer 7 proxy?
 [] SNI
 [x] CDN && Cloud flare
@@ -20,7 +20,7 @@
 [x] Node HTTPS
 [x] Node HTTP
 [] Node HTTP2
-[] Node Cluster module
+[x] Node Cluster module
 [x] Node Repl
 [] JS event pool
 [X] Hands on Buffer and Stream
@@ -28,7 +28,7 @@
 [x] Firebase android IOS notification API
 [x] Database Connection pool
 [x] Bitwise operators 
-[x] Working_threads vs child_process vs cluster
+[] Working_threads vs child_process vs cluster
 [] PM2
 
 ## Event queue/broker
@@ -38,3 +38,5 @@
 [] MongoDB JSONSchema
 [] MongoDB write concerns 
 
+## WebServer, Proxy, LoadBalancer
+[] https://www.nginx.com/resources/wiki/start/topics/tutorials/config_pitfalls/

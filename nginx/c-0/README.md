@@ -1178,3 +1178,68 @@ Then add this to end of the configuration:
 @daily certbot renew
 
 ```
+
+## NGINX as reverse proxy
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+
+        server {
+                listen 80;
+                server_name 172.17.0.2;
+
+                location /server {
+                        add_header X-Header-For-Client Hello-Client; # Client will receive this header
+
+                        proxy_set_header X-Header-For-Server Hello-Server; # Server will receive this header
+
+                        proxy_pass http://localhost:3000/; # If trailing '/' not specify request will proxy to '/server/rest of request_uri'; But since '/' provided request will proxy to '/res of request request_uri'
+                }
+        }
+}
+
+```
+
+## NGINX as load balancer
+
+```txt
+user www-data;
+
+worker_processes auto;
+
+events {
+  worker_connections 1048576;
+}
+
+http {
+        upstream foo_servers {
+                server 127.0.0.1:3000;
+                server 127.0.0.1:3001;
+                server 127.0.0.1:3002;
+        }
+
+        server {
+                listen 80;
+                server_name 172.17.0.2;
+
+                location / {
+                        proxy_pass http://foo_servers;
+                }
+        }
+}
+
+```
+
+See the round robin:
+
+> while sleep 1; do curl http://172.17.0.2; done
+
+## [Choosing a Load-Balancing Method
