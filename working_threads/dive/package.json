@@ -1,0 +1,13 @@
+{
+  "name": "dive",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^14.6.4",
+    "typescript": "^4.0.2"
+  },
+  "scripts": {
+    "build": "tsc -W"
+  }
+}
