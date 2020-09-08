@@ -4,9 +4,16 @@
 4. Setup https://letsencrypt.org/
    - Install lets encrypt
    - Generate public and private key:
+   
 > nginx -s stop
 
 > sudo cartbot certonly --standalone  
+
+```sh
+/etc/letsencrypt/live/<HOST>/fullchain.pem
+/etc/letsencrypt/live/<HOST>/privkey.pem
+
+```
 
 5. ./nginx/nginx.conf
 6. `docker exec <DOCKER_IP> sudo nginx`
