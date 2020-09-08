@@ -30,6 +30,7 @@
 [x] Bitwise operators 
 [] Working_threads vs child_process vs cluster
 [] PM2
+[] Dynamic import 
 
 ## Event queue/broker
 [] RabbitMQ and RabbitMQ exchange

@@ -1,4 +1,3 @@
-
 const res = heavyOperation();
 
 process.send(res);
