@@ -23,13 +23,13 @@
 [x] Node Cluster module
 [x] Node Repl
 [] JS event pool
-[X] Hands on Buffer and Stream
-[X] Child processes https://jscomplete.com/learn/node-beyond-basics/child-processes
+[x] Hands on Buffer and Stream
+[x] Child processes https://jscomplete.com/learn/node-beyond-basics/child-processes
 [x] Firebase android IOS notification API
 [x] Database Connection pool
 [x] Bitwise operators 
 [] Working_threads vs child_process vs cluster
-[] PM2
+[x] PM2
 [] Dynamic import 
 
 ## Event queue/broker
