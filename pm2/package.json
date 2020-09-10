@@ -8,6 +8,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "pm2": "^4.4.1"
+    "pm2": "^4.4.2"
   }
 }
