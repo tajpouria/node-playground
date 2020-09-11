@@ -10,3 +10,4 @@ pg-data/
 ./cookies/implementation101/server/chinook.db
 **/package-lock.json
 **/tsconfig.tsbuildinfo
+**/cache/
