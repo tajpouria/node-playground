@@ -9,6 +9,9 @@
 [x] layer 4 vs layer 7 proxy?
 [] SNI
 [x] CDN && Cloud flare
+[] WireShark http1.1
+[] WireShark http1.1 + TLS v1.2 and v1.3
+[] WireShark http2
 
 ## SDLC
 [] GRPC
