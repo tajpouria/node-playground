@@ -11,3 +11,4 @@ pg-data/
 **/package-lock.json
 **/tsconfig.tsbuildinfo
 **/cache/
+**/.secret
