@@ -6,6 +6,7 @@ import { ProductModule } from './product/product.module';
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://0.0.0.0:27017/nest'),
+
     ProductModule,
   ],
 })
