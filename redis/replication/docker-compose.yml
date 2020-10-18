@@ -1,0 +1,7 @@
+version: "3.8"
+services:
+  master:
+    image: redis
+  slave:
+    image: redis
+    command: redis-server --slaveof master 6379
