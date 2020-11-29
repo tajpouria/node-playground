@@ -17,7 +17,7 @@
 [] GRPC
 [] CQRS
 [] Cohesion
-[] Sharding
+[] Database Sharding
 
 ## Node
 [x] Node HTTPS
@@ -33,17 +33,25 @@
 [x] Bitwise operators 
 [] Working_threads vs child_process vs cluster
 [x] PM2
-[] Dynamic import 
+[] Dynamic import
 [] Buffer
 [] toString(??) and digest(??)
+[] Streams
 
 ## Event queue/broker
 [] RabbitMQ and RabbitMQ exchange
 
 ## Database
 [] MongoDB JSONSchema
-[] MongoDB write concerns 
+[] MongoDB write concerns
 
 ## WebServer, Proxy, LoadBalancer
 [] https://www.nginx.com/resources/wiki/start/topics/tutorials/config_pitfalls/
 [] https://www.nginx.com/blog/smart-efficient-byte-range-caching-nginx/
+
+# Crypto
+[X] HASH functions
+[X] Symmetric ciphers
+[] RSA algorithm
+[] DH and EDH algorithm
+[] TLS cipher suit and it's works
