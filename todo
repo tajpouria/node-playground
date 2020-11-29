@@ -2,16 +2,16 @@
 [x] What is UDP?
 [x] What is TLS and why use TLS v1.3?
 [x] What is SSL/TLS and how SSL certificate works?
-[] What is HTTP2 and why use it?
+[x] What is HTTP2 and why use it?
 [x] Hands-on SSH
 [] Telnet
 [] nc
 [x] layer 4 vs layer 7 proxy?
 [] SNI
 [x] CDN && Cloud flare
-[] WireShark http1.1
-[] WireShark http1.1 + TLS v1.2 and v1.3
-[] WireShark http2
+[x] WireShark http1.1
+[x] WireShark http1.1 + TLS v1.2 and v1.3
+[x] WireShark http2
 
 ## SDLC
 [] GRPC
@@ -22,7 +22,7 @@
 ## Node
 [x] Node HTTPS
 [x] Node HTTP
-[] Node HTTP2
+[x] Node HTTP2
 [x] Node Cluster module
 [x] Node Repl
 [] JS event pool
@@ -34,6 +34,8 @@
 [] Working_threads vs child_process vs cluster
 [x] PM2
 [] Dynamic import 
+[] Buffer
+[] toString(??) and digest(??)
 
 ## Event queue/broker
 [] RabbitMQ and RabbitMQ exchange
