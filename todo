@@ -38,8 +38,10 @@
 [] toString(??) and digest(??)
 [] Streams
 
-## Event queue/broker
+## Events 
 [] RabbitMQ and RabbitMQ exchange
+[] ACID
+[] Saga pattern
 
 ## Database
 [] MongoDB JSONSchema
@@ -55,3 +57,4 @@
 [] RSA algorithm
 [] DH and EDH algorithm
 [] TLS cipher suit and it's works
+
