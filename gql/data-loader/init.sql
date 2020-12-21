@@ -1,0 +1,13 @@
+CREATE DATABASE IF NOT EXISTS root;
+
+use root;
+
+CREATE TABLE books (
+	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	title VARCHAR(30) NOT NULL,
+);
+
+INSERT INTO books 
+(title)
+VALUES ("foo");
+

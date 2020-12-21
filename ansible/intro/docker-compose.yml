@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  zero:
+    image: ubuntu:latest
+    command: tail -F anything
+  two:
+    image: ubuntu:latest
+    command: tail -F anything
+  three:
+    image: ubuntu:latest
+    command: tail -F anything
+
