@@ -32,6 +32,7 @@
 [x] Database Connection pool
 [x] Bitwise operators 
 [] Working_threads vs child_process vs cluster
+[] What is the difference between processes and threads?
 [x] PM2
 [] Dynamic import
 [] Buffer
@@ -57,4 +58,3 @@
 [] RSA algorithm
 [] DH and EDH algorithm
 [] TLS cipher suit and it's works
-
