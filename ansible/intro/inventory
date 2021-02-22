@@ -1,0 +1,6 @@
+[App]
+192.168.42.93
+192.168.42.113
+
+[App:vars]
+ansible_ssh_user=tajpouria
