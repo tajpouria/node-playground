@@ -1,0 +1,64 @@
+<template>
+  <div id="app">
+    <div v-if="usernameAlreadySelected"><Chat /></div>
+    <div v-else>
+      <form @submit.prevent="handleSubmit">
+        <label>
+          username:
+          <input type="text" v-model="user.username" required />
+        </label>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script>
+import socket from "./socket";
+import Chat from "./components/Chat";
+
+export default {
+  name: "App",
+  components: { Chat },
+
+  data() {
+    return {
+      usernameAlreadySelected: false,
+      user: {
+        username: "",
+      },
+    };
+  },
+
+  methods: {
+    handleSubmit() {
+      this.usernameAlreadySelected = true;
+      socket.auth = { username: this.user.username };
+      socket.connect();
+    },
+  },
+
+  created() {
+    socket.on("connect_error", (err) => {
+      if (err.message === "invalid username") {
+        this.usernameAlreadySelected = false;
+      }
+    });
+  },
+
+  destroyed() {
+    socket.off("connect_error");
+  },
+};
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
