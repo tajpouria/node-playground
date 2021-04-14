@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <div v-if="usernameAlreadySelected"><Chat /></div>
+    <div v-if="usernameAlreadySelected">
+      <Lobby v-bind:username="user.username" />
+    </div>
     <div v-else>
       <form @submit.prevent="handleSubmit">
         <label>
@@ -15,11 +17,11 @@
 
 <script>
 import socket from "./socket";
-import Chat from "./components/Chat";
+import Lobby from "./components/Lobby";
 
 export default {
   name: "App",
-  components: { Chat },
+  components: { Lobby },
 
   data() {
     return {
@@ -54,11 +56,6 @@ export default {
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  width: 100vw;
 }
 </style>

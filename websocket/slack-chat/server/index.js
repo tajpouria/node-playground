@@ -28,6 +28,13 @@ io.on("connection", (socket) => {
     userID: socket.id,
     username: socket.username,
   });
+
+  socket.on("private message", ({ content, to }) => {
+    socket.to(to).emit("private message", {
+      content,
+      from: socket.id,
+    });
+  });
 });
 
 const PORT = process.env.PORT || 3000;
