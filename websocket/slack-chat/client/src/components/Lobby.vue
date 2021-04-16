@@ -82,7 +82,6 @@ export default {
     socket.on("users", (users) => {
       this.users = users.map((u) => ({
         ...u,
-        messages: [],
         hasNewMessage: false,
       }));
     });

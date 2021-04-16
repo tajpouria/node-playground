@@ -1,5 +1,23 @@
+const { InMemoryMessageStore } = require("../message-store");
 const { InMemorySessionStore } = require("./session-store");
 const sessionStore = new InMemorySessionStore();
+const messageStore = new InMemoryMessageStore();
+
+/**
+ * {
+ *  sessionID: {
+ *  userID
+ * }
+ * }
+ */
+
+/**
+ * messageStore: {
+ *    userID:[
+ *     { content, from, to }
+ *  ]
+ * }
+ */
 
 const httpServer = require("http").createServer();
 const io = require("socket.io")(httpServer, {
@@ -7,6 +25,21 @@ const io = require("socket.io")(httpServer, {
     origin: "http://localhost:8080",
   },
 });
+
+function calcContacts(userID) {
+  const users = [];
+  for (const user of sessionStore.findAllSessions()) {
+    const messages = [];
+    for (const msg of messageStore.store.get(userID) || []) {
+      if (msg.to === user.userID || msg.from === user.userID) {
+        messages.push(msg);
+      }
+    }
+    user.messages = messages;
+    users.push(user);
+  }
+  return users;
+}
 
 io.use((socket, next) => {
   const sessionID = parseFloat(socket.handshake.auth.sessionID);
@@ -51,15 +84,20 @@ io.on("connection", (socket) => {
     ...sessionStore.findSession(socket.sessionID),
     connected: true,
   });
-  socket.emit("users", sessionStore.findAllSessions());
 
-  socket.broadcast.emit("users", sessionStore.findAllSessions());
+  const users = calcContacts(socket.userID);
+  socket.emit("users", users);
+  socket.broadcast.emit("users", users);
 
   socket.on("private message", ({ content, to }) => {
-    socket.to(to).emit("private message", {
+    const msg = {
       content,
       from: socket.userID,
-    });
+      to,
+    };
+    messageStore.append(socket.userID, msg);
+    messageStore.append(to, msg);
+    socket.to(to).emit("private message", msg);
   });
 
   socket.on("disconnect", async () => {
@@ -71,7 +109,7 @@ io.on("connection", (socket) => {
         connected: false,
       });
     }
-    socket.broadcast.emit("users", sessionStore.findAllSessions());
+    socket.broadcast.emit("users", calcContacts(socket.userID));
   });
 });
 
