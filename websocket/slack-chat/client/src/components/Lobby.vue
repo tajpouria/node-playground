@@ -2,13 +2,14 @@
   <div class="lobby">
     <ul>
       <li v-for="user in users" :key="user.userID">
-        <button
-          v-on:click="selectUser(user)"
-          :disabled="user.username === username"
-        >
-          {{ user.username }} <i v-if="user.username === username">(You)</i>
+        <button v-on:click="selectUser(user)" :disabled="isME(user)">
+          {{ user.username }}
+          <i v-if="isME(user)">(yourself)</i>
         </button>
-        <b v-if="user.hasNewMessage"> !</b>
+        <i v-if="user.connected"> Online</i>
+        <i v-else> Offline</i>
+
+        <b v-if="user.hasNewMessage"> (!)</b>
       </li>
     </ul>
     <div>
@@ -18,7 +19,7 @@
         </p>
         <ul>
           <li v-for="m in selectedUser.messages" v-bind:key="Math.random(m)">
-            <i v-if="m.fromSelf">You: </i>
+            <i v-if="m.fromSelf">yourself: </i>
             <i v-else>{{ selectedUser.username }}: </i>
             {{ m.content }}
           </li>
@@ -38,7 +39,7 @@ import socket from "../socket";
 export default {
   name: "Lobby",
 
-  props: ["username"],
+  props: ["me"],
 
   data() {
     return {
@@ -71,6 +72,10 @@ export default {
         });
       }
     },
+
+    isME(user) {
+      return user.userID === this.me.userID ? true : false;
+    },
   },
 
   created() {
@@ -80,10 +85,6 @@ export default {
         messages: [],
         hasNewMessage: false,
       }));
-    });
-
-    socket.on("user connected", (user) => {
-      this.users.push({ ...user, messages: [], hasNewMessage: false });
     });
 
     socket.on("private message", ({ content, from }) => {

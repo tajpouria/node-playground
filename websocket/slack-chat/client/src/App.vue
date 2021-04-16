@@ -1,9 +1,12 @@
 <template>
   <div id="app">
-    <div v-if="usernameAlreadySelected">
-      <Lobby v-bind:username="user.username" />
+    <div v-bind:style="{ display: usernameAlreadySelected ? 'block' : 'none' }">
+      <Lobby v-bind:me="user" />
     </div>
-    <div v-else>
+    <div
+      id="user-info"
+      v-bind:style="{ display: usernameAlreadySelected ? 'none' : 'block' }"
+    >
       <form @submit.prevent="handleSubmit">
         <label>
           username:
@@ -18,6 +21,8 @@
 <script>
 import socket from "./socket";
 import Lobby from "./components/Lobby";
+
+const SESSSION_ID_KEY = "_sess_id";
 
 export default {
   name: "App",
@@ -34,13 +39,24 @@ export default {
 
   methods: {
     handleSubmit() {
-      this.usernameAlreadySelected = true;
       socket.auth = { username: this.user.username };
       socket.connect();
     },
   },
 
   created() {
+    const sessionID = sessionStorage.getItem(SESSSION_ID_KEY);
+    if (sessionID) {
+      socket.auth = { sessionID };
+      socket.connect();
+    }
+
+    socket.on("session", ({ sessionID, ...user }) => {
+      this.user = user;
+      this.usernameAlreadySelected = true;
+      sessionStorage.setItem(SESSSION_ID_KEY, sessionID);
+    });
+
     socket.on("connect_error", (err) => {
       if (err.message === "invalid username") {
         this.usernameAlreadySelected = false;

@@ -1,3 +1,6 @@
+const { InMemorySessionStore } = require("./session-store");
+const sessionStore = new InMemorySessionStore();
+
 const httpServer = require("http").createServer();
 const io = require("socket.io")(httpServer, {
   cors: {
@@ -6,34 +9,69 @@ const io = require("socket.io")(httpServer, {
 });
 
 io.use((socket, next) => {
+  const sessionID = parseFloat(socket.handshake.auth.sessionID);
+  if (sessionID) {
+    const session = sessionStore.findSession(sessionID);
+    if (session) {
+      socket.sessionID = sessionID;
+      socket.username = session.username;
+      socket.userID = session.userID;
+      return next();
+    }
+  }
+
   const username = socket.handshake.auth.username;
   if (!username) {
     return next(new Error("invalid username"));
   }
+
+  const newSessionID = Math.random();
+  const userID = Math.random();
+  socket.sessionID = newSessionID;
   socket.username = username;
+  socket.userID = userID;
+  sessionStore.saveSession(newSessionID, {
+    username,
+    userID,
+    connected: true,
+  });
   next();
 });
 
 io.on("connection", (socket) => {
-  const users = [];
-  for (let [id, socket] of io.of("/").sockets) {
-    users.push({
-      userID: id,
-      username: socket.username,
-    });
-  }
-  socket.emit("users", users);
-
-  socket.broadcast.emit("user connected", {
-    userID: socket.id,
+  socket.emit("session", {
+    sessionID: socket.sessionID,
     username: socket.username,
+    userID: socket.userID,
   });
+
+  socket.join(socket.userID);
+
+  sessionStore.saveSession(socket.sessionID, {
+    ...sessionStore.findSession(socket.sessionID),
+    connected: true,
+  });
+  socket.emit("users", sessionStore.findAllSessions());
+
+  socket.broadcast.emit("users", sessionStore.findAllSessions());
 
   socket.on("private message", ({ content, to }) => {
     socket.to(to).emit("private message", {
       content,
-      from: socket.id,
+      from: socket.userID,
     });
+  });
+
+  socket.on("disconnect", async () => {
+    const matchingSockets = await io.in(socket.userID).allSockets();
+    const isDisconnected = matchingSockets.size === 0;
+    if (isDisconnected) {
+      sessionStore.saveSession(socket.sessionID, {
+        ...sessionStore.findSession(socket.sessionID),
+        connected: false,
+      });
+    }
+    socket.broadcast.emit("users", sessionStore.findAllSessions());
   });
 });
 
