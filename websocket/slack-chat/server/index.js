@@ -1,4 +1,6 @@
-const { InMemoryMessageStore } = require("../message-store");
+const { setupWorker } = require("@socket.io/sticky");
+
+const { InMemoryMessageStore } = require("./message-store");
 const { InMemorySessionStore } = require("./session-store");
 const sessionStore = new InMemorySessionStore();
 const messageStore = new InMemoryMessageStore();
@@ -113,7 +115,4 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () =>
-  console.log(`server listening at http://localhost:${PORT}`),
-);
+setupWorker(io);
