@@ -1,9 +1,13 @@
+const Redis = require("ioredis");
 const { setupWorker } = require("@socket.io/sticky");
 
-const { InMemoryMessageStore } = require("./message-store");
-const { InMemorySessionStore } = require("./session-store");
-const sessionStore = new InMemorySessionStore();
-const messageStore = new InMemoryMessageStore();
+const { RedisMessageStore } = require("./message-store");
+const { RedisSessionStore } = require("./session-store");
+
+const redis = new Redis();
+
+const sessionStore = new RedisSessionStore(redis);
+const messageStore = new RedisMessageStore(redis);
 
 /**
  * {
@@ -26,13 +30,19 @@ const io = require("socket.io")(httpServer, {
   cors: {
     origin: "http://localhost:8080",
   },
+
+  adapter: require("socket.io-redis")({
+    pubClient: redis,
+    subClient: redis.duplicate(),
+  }),
 });
 
-function calcContacts(userID) {
+async function calcContacts(userID) {
   const users = [];
-  for (const user of sessionStore.findAllSessions()) {
+  for (const user of await sessionStore.findAllSessions()) {
     const messages = [];
-    for (const msg of messageStore.store.get(userID) || []) {
+    const uMessages = (await messageStore.find(userID)) || [];
+    for (const msg of uMessages) {
       if (msg.to === user.userID || msg.from === user.userID) {
         messages.push(msg);
       }
@@ -40,13 +50,14 @@ function calcContacts(userID) {
     user.messages = messages;
     users.push(user);
   }
+
   return users;
 }
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const sessionID = parseFloat(socket.handshake.auth.sessionID);
   if (sessionID) {
-    const session = sessionStore.findSession(sessionID);
+    const session = await sessionStore.findSession(sessionID);
     if (session) {
       socket.sessionID = sessionID;
       socket.username = session.username;
@@ -65,7 +76,7 @@ io.use((socket, next) => {
   socket.sessionID = newSessionID;
   socket.username = username;
   socket.userID = userID;
-  sessionStore.saveSession(newSessionID, {
+  await sessionStore.saveSession(newSessionID, {
     username,
     userID,
     connected: true,
@@ -73,7 +84,7 @@ io.use((socket, next) => {
   next();
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   socket.emit("session", {
     sessionID: socket.sessionID,
     username: socket.username,
@@ -82,23 +93,23 @@ io.on("connection", (socket) => {
 
   socket.join(socket.userID);
 
-  sessionStore.saveSession(socket.sessionID, {
-    ...sessionStore.findSession(socket.sessionID),
+  const pSession = await sessionStore.findSession(socket.sessionID);
+  await sessionStore.saveSession(socket.sessionID, {
+    ...pSession,
     connected: true,
   });
 
-  const users = calcContacts(socket.userID);
+  const users = await calcContacts(socket.userID);
   socket.emit("users", users);
   socket.broadcast.emit("users", users);
 
-  socket.on("private message", ({ content, to }) => {
+  socket.on("private message", async ({ content, to }) => {
     const msg = {
       content,
       from: socket.userID,
       to,
     };
-    messageStore.append(socket.userID, msg);
-    messageStore.append(to, msg);
+    await messageStore.append(msg);
     socket.to(to).emit("private message", msg);
   });
 
@@ -106,12 +117,13 @@ io.on("connection", (socket) => {
     const matchingSockets = await io.in(socket.userID).allSockets();
     const isDisconnected = matchingSockets.size === 0;
     if (isDisconnected) {
+      const pSession = await sessionStore.findSession(socket.sessionID);
       sessionStore.saveSession(socket.sessionID, {
-        ...sessionStore.findSession(socket.sessionID),
+        ...pSession,
         connected: false,
       });
     }
-    socket.broadcast.emit("users", calcContacts(socket.userID));
+    socket.broadcast.emit("users", await calcContacts(socket.userID));
   });
 });
 

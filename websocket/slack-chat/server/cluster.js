@@ -2,7 +2,7 @@ const cluster = require("cluster");
 const { setupMaster } = require("@socket.io/sticky");
 const http = require("http");
 
-const WORKER_COUNT = 4;
+const WORKER_COUNT = require("os").cpus().length;
 
 if (cluster.isMaster) {
   console.info(`Master ${process.pid} started`);
