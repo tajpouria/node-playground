@@ -1,6 +1,6 @@
-## [What Is Elastic Search](https://knowi.com/blog/what-is-elastic-search)
-
 ### Elastic Search Back end components
+
+[What Is Elastic Search](https://knowi.com/blog/what-is-elastic-search)
 
 - Cluster: Group of nodes that connected together, And distributes tasks search and etc across nodes 
 
@@ -16,4 +16,11 @@
 
 - Replicas: Copy of the shard indices. By providing data redundancy, replicas will protect against hardware failures and increases search read requests capabilities
 
+###
+
+### Node.js integration
+
+- [Official client lib](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/installation.html)
+
+- [Mocking lib](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-testing.html#_elasticelasticsearch_mock)
 
