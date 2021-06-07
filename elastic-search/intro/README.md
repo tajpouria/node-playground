@@ -18,7 +18,7 @@
 
 ###
 
-### Node.js integration
+### Node JS integration
 
 - [Official client lib](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/installation.html)
 
